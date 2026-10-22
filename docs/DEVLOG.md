@@ -843,6 +843,131 @@ BGM 走独立通道直连输出，音效走原来的通道。第一版 BGM 峰�
 
 ---
 
+## 03:15 竖屏判断重做 + 进游戏自动锁横屏
+
+用户反馈：手机已经横过来了，遮罩还挂着。
+
+### 根因：不是判断错，是判断得太早
+
+原来的写法：
+
+```js
+addEventListener('orientationchange', function(){ setTimeout(checkOrient, 220); });
+```
+
+`orientationchange` 事件在部分安卓浏览器上触发时，`window.innerWidth/innerHeight` **还没更新**。实测延迟能到 600-800ms（跟具体机型和浏览器版本有关）。我只等了 220ms，读到的还是转屏前的旧尺寸，于是判定为竖屏，遮罩亮起。
+
+之后没有新事件再触发检查，遮罩就永远挂在那里。这就是「我明明横屏了」。
+
+### 为什么不用陀螺仪
+
+陀螺仪（DeviceOrientationEvent）读到的是**设备物理姿态**，不是屏幕方向。三个问题：
+
+1. iOS 13 起要单独申请权限，会多弹一个授权框
+2. 躺着玩时手机平面朝上，beta 接近 0，判断不出横竖
+3. 设备姿态和屏幕方向是两件事：系统允许在物理横握时把界面锁成竖屏
+
+真正对应「屏幕朝哪」的 API 是 `screen.orientation.type`，它直接给出 `portrait-primary` / `landscape-primary` 这类值。这是系统层面的答案，比自己推算准，也不需要授权。
+
+### 改法：三层依据 + 多段重试 + 主动锁屏
+
+**第一层，判断依据按权威度排序**
+
+```js
+function isPortraitNow(){
+  var so = window.screen && window.screen.orientation;
+  if(so && so.type) return so.type.indexOf('portrait') === 0;   // 系统直给
+  return window.innerHeight > window.innerWidth * 1.34;          // 旧浏览器兜底
+}
+```
+
+兜底分支用了 **1.34 倍阈值**，只有高度明显大于宽度才算竖屏。因为手机浏览器的地址栏、桌面窄窗口都会让高比宽大一点点，按原来 `h > w` 的等比判断会误触。
+
+**第二层，触屏判断收紧**
+
+```js
+function isTouchDevice(){
+  if(navigator.maxTouchPoints <= 0) return false;
+  if(window.matchMedia){
+    if(window.matchMedia('(hover: none)').matches) return true;   // 手机平板，没有悬停
+    if(window.matchMedia('(pointer: coarse)').matches) return true;
+    return false;                                                 // 桌面，含触屏笔记本
+  }
+  return 'ontouchstart' in window;
+}
+```
+
+加了 `hover: none` 这一条。桌面触屏笔记本虽然有 touch 点数，但主指针能悬停，所以判为桌面。**电脑上再也不会弹这个遮罩**。
+
+**第三层，转屏检查改成 4 段重试**
+
+```js
+orientTimers = [60, 180, 420, 850].map(function(ms){
+  return setTimeout(checkOrient, ms);
+});
+```
+
+转屏后 60ms、180ms、420ms、850ms 各查一次，覆盖不同浏览器的延迟差异。晚到的那次读到正确值，遮罩就撤掉。同时监听 `screen.orientation` 的 change 事件，比 `orientationchange` 更准。
+
+**第四层，进游戏直接请求全屏横屏**
+
+```js
+function startGame(){
+  unlockAudio();
+  tryLockLandscape();   // 用户点击这一下里请求
+  ...
+}
+```
+
+`tryLockLandscape()` 做两件事：`requestFullscreen()`，然后 `screen.orientation.lock('landscape')`。
+
+这个 API 有两个硬约束：**必须由用户手势触发**、**必须在全屏状态下才生效**。所以只能放在点击「开始对战」的那一刻。「进去就直接强制横屏」在这里才成立。
+
+平台差异：
+
+| 平台 | 结果 |
+|---|---|
+| 安卓 Chrome | 真正锁死，物理转成竖屏也不变 |
+| iOS Safari | 不支持 `lock`，锁不住，回落到遮罩 |
+| 桌面 | `isTouchDevice()` 为 false，直接返回，什么都不做 |
+| iframe 内（预览） | 全屏请求被拒，catch 掉，不影响游戏 |
+
+### 遮罩本身也改了：不再挡死
+
+原来只有一个提示，锁不住就卡住。现在两个按钮：
+
+- **自动横屏** → 再请求一次锁屏
+- **就这样玩** → 关掉遮罩，竖着也能玩（相机是俯视的，视野窄但不影响操作）
+
+这样任何设备上都不可能被这个遮罩卡住。
+
+### 顺带修的一个漏洞
+
+原来竖屏遮罩出现时只暂停音乐，游戏逻辑还在跑。玩家转个屏回来，血掉了一半。现在遮罩出现时 `S.mode` 一并设为 `pause`，撤掉遮罩时恢复，用 `ORIENT.pausedByRotate` 记录这次暂停是不是遮罩引起的，避免和 ESC 暂停混淆。
+
+### 验证：8 条用例，测的是真代码
+
+没有抄副本，脚本从 `index.html` 里用括号匹配把 `isPortraitNow` / `isTouchDevice` 的函数源码抓出来，注入不同的 `window` / `navigator` 环境执行。
+
+| 场景 | 触屏 | 竖屏 | 结果 |
+|---|---|---|---|
+| 手机竖屏（新 API） | true | true | PASS |
+| 手机横屏（新 API） | true | false | PASS |
+| 手机横屏倒转（新 API） | true | false | PASS |
+| 旧 Safari 竖屏 | true | true | PASS |
+| 旧 Safari 横屏 | true | false | PASS |
+| 桌面窄窗 800×1000 | false | true | PASS |
+| 桌面触屏笔记本横屏 | false | false | PASS |
+| 桌面普通窗口 | false | false | PASS |
+
+8 通过 / 0 失败。桌面窗口那两条的「触屏」是 false，遮罩永远不会出现，从条件上排除。
+
+最后一组单测直接复现了这次的 bug：竖屏时 `isPortraitNow = true`，切换成横屏环境后 `isPortraitNow = false`，说明判断依据本身是对的，问题确实出在「查得太早」。
+
+用例放在 `tests/orient.test.mjs`，跑法：`node tests/orient.test.mjs`。以后改这段判断，先跑它。
+
+---
+
 ## 尚未验证
 
 诚实记录，这几项没测过：
