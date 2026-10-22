@@ -184,7 +184,9 @@ h1.logo em{font-style:normal;color:var(--yel);display:block}
 .card .up{font-family:var(--disp);font-size:11px;letter-spacing:.1em;color:#fff;background:var(--ink);
   display:inline-block;padding:2px 8px;margin-top:8px}
 .card.evoc{border-color:#7b2ff7;box-shadow:8px 8px 0 #7b2ff7,0 0 28px rgba(255,46,136,.55)}
+.card.evoc .kd{color:#ff2e88}
 .card.limitc .gain{color:#0f766e}
+.card.limitc .kd{color:#0f766e}
 #rerollbtn{font-family:var(--disp);font-size:15px;letter-spacing:.14em;padding:8px 26px;
   background:var(--ink);color:var(--paper);border:4px solid var(--paper);border-radius:5px;
   cursor:pointer;box-shadow:5px 5px 0 rgba(10,10,18,.7);transform:skewX(-6deg)}
@@ -202,13 +204,14 @@ h1.logo em{font-style:normal;color:var(--yel);display:block}
   padding-bottom:8px;margin-bottom:12px}
 .baghead h2{font-family:var(--disp);font-size:26px;letter-spacing:.08em}
 .baghead span{font-family:var(--disp);font-size:11px;letter-spacing:.16em;color:#6b6b7a}
-.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(182px,1fr));gap:10px}
 .bitem{background:#fff;border:4px solid var(--ink);border-radius:4px;padding:9px;position:relative;
   box-shadow:4px 4px 0 var(--ink)}
 .bitem .t{font-family:var(--disp);font-size:15px;letter-spacing:.04em;display:flex;justify-content:space-between;
-  align-items:baseline;gap:6px}
+  align-items:baseline;gap:6px;flex-wrap:nowrap}
+.bitem .t span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bitem .t i{font-style:normal;font-size:11px;background:var(--ink);color:var(--yel);padding:1px 6px;
-  font-family:var(--disp);letter-spacing:.1em}
+  font-family:var(--disp);letter-spacing:.1em;flex:0 0 auto}
 .bitem .d{font-size:11px;line-height:1.5;color:#4a4a58;margin-top:5px}
 .bitem .drop{position:absolute;top:-9px;right:-9px;width:24px;height:24px;border-radius:50%;
   background:var(--red);color:#fff;border:3px solid var(--ink);font-family:var(--disp);font-size:13px;
@@ -222,8 +225,14 @@ h1.logo em{font-style:normal;color:var(--yel);display:block}
 .pipsx{display:flex;gap:3px;margin-top:6px}
 .pipsx i{flex:1;height:6px;background:#dcdce6;border:2px solid var(--ink)}
 .pipsx i.on{background:var(--ink)}
-.evoline{margin-top:7px;font-size:10px;line-height:1.45;color:#7b2ff7;font-weight:700}
+.evoline{margin-top:7px;font-size:10px;line-height:1.45;color:#7b2ff7;font-weight:700;
+  white-space:normal;word-break:break-word}
 .evoline.ready{color:#0a8f55}
+.swaprow{margin-top:8px;text-align:right}
+.swaprow button{font-family:var(--ui);font-size:10px;font-weight:800;letter-spacing:.06em;
+  padding:3px 9px;background:var(--ink);color:var(--paper);border:2px solid var(--ink);
+  border-radius:3px;cursor:pointer}
+.swaprow button:hover{background:var(--red);border-color:var(--red)}
 .wic{width:42px;height:42px;border:3px solid var(--ink);border-radius:3px;display:flex;
   align-items:center;justify-content:center;font-family:var(--disp);font-size:13px;flex:0 0 auto;
   letter-spacing:.02em}
@@ -334,7 +343,7 @@ h1.logo em{font-style:normal;color:var(--yel);display:block}
     <div class="bagstat" id="bagstat"></div>
     <div class="bagcols">
       <div>
-        <div class="sechead">武器<span>点 X 弃用，腾出槽位</span></div>
+        <div class="sechead">武器<span>换掉可腾出槽位</span></div>
         <div class="bgrid" id="bagweapons"></div>
       </div>
       <div>
@@ -1653,9 +1662,11 @@ function renderBag(){
       evoLine;
 
     if(hero.weapons.length > 1){
-      var x = document.createElement('div');
-      x.className = 'drop'; x.textContent = '×';
-      x.onclick = function(){
+      var swapRow = document.createElement('div');
+      swapRow.className = 'swaprow';
+      var swapBtn = document.createElement('button');
+      swapBtn.textContent = '换掉这把';
+      swapBtn.onclick = function(){
         var i = hero.weapons.indexOf(w);
         if(i >= 0){
           hero.weapons.splice(i, 1);
@@ -1663,7 +1674,8 @@ function renderBag(){
           toast('已换掉 · ' + d.name, '#ff3b30');
         }
       };
-      el.appendChild(x);
+      swapRow.appendChild(swapBtn);
+      el.appendChild(swapRow);
     }
     bw.appendChild(el);
   });
