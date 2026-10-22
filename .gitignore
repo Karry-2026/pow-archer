@@ -1,0 +1,15 @@
+# 临时测试脚本（自动化验证用，不入库）
+_*.mjs
+_c.js
+_patch.py
+_check.js
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 依赖与构建产物
+node_modules/
+dist/
+*.log
