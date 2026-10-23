@@ -324,6 +324,11 @@ body.is-title canvas#gl{
 .card .up{font-family:var(--disp);font-size:11px;letter-spacing:.1em;color:#fff;background:var(--ink);
   display:inline-block;padding:2px 8px;margin-top:8px}
 .card.evoc{border-color:#7b2ff7;box-shadow:8px 8px 0 #7b2ff7,0 0 28px rgba(255,46,136,.55)}
+/* 新武器卡：用青色边框和标签跟「强化/被动」区分开，
+   否则玩家在快节奏里分不出这张卡会往背包里加东西 */
+.card.newc{border-color:#00b8d4;box-shadow:8px 8px 0 #00b8d4,0 0 26px rgba(0,229,255,.32)}
+.card.newc .kd{color:#006d7d;font-weight:800}
+.card.newc .gain{color:#00808f}
 .card.evoc .kd{color:#ff2e88}
 .card.limitc .gain{color:#0f766e}
 .card.limitc .kd{color:#0f766e}
@@ -2198,7 +2203,11 @@ function buildChoices(){
     if(w.lv < WDEF[w.id].max) opts.push({t:'wup', id:w.id});
   });
   // 3. 新武器
-  if(hero.weapons.length < 3){
+  /* 武器槽一共 4 个，但原来卡池写死 < 3，玩家永远拿不到第 4 把，
+     右下角第 4 个槽一直空着。现在前 3 把随时可拿，第 4 把留到第 8 波之后——
+     既让 4 个槽都有用，又不会让前中期变简单（前中期多一把武器会显著降低难度）。 */
+  var wLimit = S.wave >= 8 ? 4 : 3;
+  if(hero.weapons.length < wLimit){
     WKEYS.forEach(function(id){ if(!hasWeapon(id)) opts.push({t:'wnew', id:id}); });
   }
   // 4. 被动
@@ -2244,11 +2253,15 @@ function openLevelUp(refresh){
       gain = 'Lv.' + w.lv + ' → Lv.' + (w.lv + 1);
       ds = d.lv[w.lv];
     } else if(c.t === 'wnew'){
+      /* 原来写「新武器 / Lv.1 解锁」，玩家在快速点卡时很容易以为是普通升级，
+         后来发现背包里多了一把，就会觉得「我没选过它怎么自己出现了」。
+         现在直接说清：会多一把、占掉一个槽位、槽位从几变几。 */
       var d2 = WDEF[c.id];
       nm = d2.name; ic = d2.short; col = d2.col;
-      kd = '新武器';
-      gain = 'Lv.1 解锁';
+      kd = '新武器 · 会占一个槽位';
+      gain = '武器 ' + hero.weapons.length + ' 把 → ' + (hero.weapons.length + 1) + ' 把';
       ds = d2.lv[0];
+      el.classList.add('newc');
     } else if(c.t === 'pas'){
       var p = PDEF[c.id], lvp = (hero.passives[c.id]||0);
       nm = p.name; ic = p.short; col = p.col;
