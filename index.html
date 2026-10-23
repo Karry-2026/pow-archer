@@ -2013,44 +2013,205 @@ function renderEnemies(){
 
 /* ═══════════ BOSS ═══════════ */
 var boss = null;
-function buildBoss(x, z, hp){
+/* ═══════════ 两个 BOSS ═══════════
+   第 5 波：裂口巨兽 —— 四足爬行，靠冲锋和震地压人，近身威胁大
+   第 10 波：千手墨神 —— 人形浮空，八臂展开，远程弹幕为主，会瞬移
+
+   两个从外形到行为都不同：一个贴地、一个悬浮；一个追你、一个躲你；
+   一个靠身体撞、一个靠弹幕封走位。玩家换打法，不是换血条数字。
+*/
+function buildBoss(x, z, hp, kind){
   var g = new THREE.Group();
-  var core = part(new THREE.IcosahedronGeometry(2.0, 1), 0x1b0f36, 1.06);
-  g.add(core);
-  var shell = part(new THREE.IcosahedronGeometry(2.15, 0), COS.mag, 1.04);
-  shell.material.transparent = true; shell.material.opacity = 0.35;
-  g.add(shell);
-  // 角
-  for(var i=0;i<5;i++){
-    var a = i/5*TAU;
-    var horn = part(new THREE.ConeGeometry(0.26, 1.5, 5), COS.yel, 1.12);
-    horn.position.set(Math.cos(a)*1.7, 0.9, Math.sin(a)*1.7);
-    horn.rotation.z = -Math.cos(a)*0.7; horn.rotation.x = Math.sin(a)*0.7;
-    g.add(horn);
+  var baseY;
+
+  /* 两个模型都按「俯视构图」重排过一次。
+     第一版是按正面视角搭的：嘴朝前、手臂往后，结果相机在正上方往下看，
+     嘴埋在身体里、八条手臂全被躯干挡住，看上去只是一个紫色团块。
+     现在所有辨识特征都摊在水平面上：巨兽的嘴是俯视可见的 V 形开口，
+     墨神的八条手臂是放射状平铺。 */
+
+  if(kind === 'hands'){
+    /* ══ 千手墨神 ══
+       俯视看是一朵八瓣放射的花：中心躯干，八条青色手臂平铺向外，
+       末端是黄色爪。这样从任何角度都能立刻认出「千手」两个字。 */
+    var BODY = 0x3b2a72, ARM = 0x00e5ff, EYE = 0xffe600;
+    baseY = 3.0;
+
+    /* 躯干：上细下粗的柱，俯视是一个圆 */
+    var torso = part(new THREE.CylinderGeometry(0.66, 0.98, 2.1, 12), BODY, 1.05);
+    torso.position.y = 0.1; g.add(torso);
+
+    /* 肩盘：把八条手臂的根部收在一个明显的圆盘上 */
+    var shoulder = part(new THREE.CylinderGeometry(0.86, 0.78, 0.34, 12), 0x241a4a, 1.04);
+    shoulder.position.y = 1.18; g.add(shoulder);
+
+    /* 头 + 一只竖着的黄眼 */
+    var head = part(new THREE.SphereGeometry(0.6, 14, 12), BODY, 1.05);
+    head.position.y = 1.62; g.add(head);
+    var eye = new THREE.Mesh(new THREE.SphereGeometry(0.33, 12, 10),
+      new THREE.MeshBasicMaterial({color: EYE}));
+    eye.scale.set(0.72, 1.3, 0.8);
+    eye.position.set(0, 1.66, 0.42); g.add(eye);
+    var pupil = new THREE.Mesh(new THREE.SphereGeometry(0.125, 10, 8),
+      new THREE.MeshBasicMaterial({color: 0x0a0a12}));
+    pupil.position.set(0, 1.66, 0.66); g.add(pupil);
+    g.userData.pupil = pupil;
+
+    /* 裙摆：开口锥体，营造「飘浮」的感觉 */
+    var skirt = part(new THREE.ConeGeometry(1.05, 2.1, 12, 1, true), BODY, 1.04);
+    skirt.position.y = -1.15; skirt.rotation.x = Math.PI;
+    g.add(skirt);
+
+    /* 八条手臂：以 45° 间隔平铺，本地 +z 指向外。
+       每只手两段 + 一个爪，长短错开形成层次。 */
+    g.userData.arms = [];
+    for(var i2=0;i2<8;i2++){
+      var ang = i2 / 8 * TAU;
+      var arm = new THREE.Group();
+      arm.position.set(Math.sin(ang) * 0.78, 1.14 + (i2 % 2) * 0.16, Math.cos(ang) * 0.78);
+      arm.rotation.y = ang;
+
+      var lower = part(new THREE.BoxGeometry(0.19, 0.19, 1.5), ARM, 1.0);
+      lower.position.z = 0.75; arm.add(lower);
+
+      var elbow = part(new THREE.SphereGeometry(0.14, 8, 6), EYE, 1.0);
+      elbow.position.z = 1.5; arm.add(elbow);
+
+      /* 第二段向外再折一下，末端张开更宽 */
+      var upper = part(new THREE.BoxGeometry(0.15, 0.15, 1.0), ARM, 1.0);
+      upper.position.set(0, 0, 1.98);
+      upper.rotation.y = 0.42 * (i2 % 2 ? 1 : -1);
+      arm.add(upper);
+
+      var claw = part(new THREE.ConeGeometry(0.21, 0.72, 5), EYE, 1.0);
+      claw.position.set(0.18 * (i2 % 2 ? 1 : -1), 0, 2.5);
+      claw.rotation.x = Math.PI / 2;
+      arm.add(claw);
+
+      /* 记下基准角和摆动相位。
+         坑：v2 的模型没写 userData.rz，而 updateHandsBoss 里算的是
+         arm.rotation.z = userData.rz + 摆动值 → undefined + 数字 = NaN，
+         矩阵直接失效，八条手臂一个都不渲染。 */
+      arm.userData.baseAng = ang;
+      arm.userData.phase = i2 * 0.8;
+      g.add(arm);
+      g.userData.arms.push(arm);
+    }
+
+    /* 两圈反向旋转的能量环 */
+    var h1 = new THREE.Mesh(new THREE.TorusGeometry(2.55, 0.07, 6, 40),
+      new THREE.MeshBasicMaterial({color: COS.cyn, transparent:true, opacity:0.8}));
+    h1.rotation.x = Math.PI/2; h1.position.y = -1.95; g.add(h1);
+    var h2 = new THREE.Mesh(new THREE.TorusGeometry(1.85, 0.055, 6, 36),
+      new THREE.MeshBasicMaterial({color: COS.mag, transparent:true, opacity:0.75}));
+    h2.rotation.x = Math.PI/2; h2.position.y = -2.3; g.add(h2);
+    g.userData.ring1 = h1; g.userData.ring2 = h2;
+
+  } else {
+    /* ══ 裂口巨兽 ══
+       俯视构图：一张巨大的紫色圆饼，正前方挖开一个红色大嘴，
+       嘴沿排一圈白牙，两只黄眼在嘴后方。
+       前两版失败的原因都是「嘴朝向相机看不到的方向」——
+       相机在正上方偏后，向前伸的嘴被自己的身体挡住。
+       现在嘴开在水平面上，占身体三分之一的面积，俯视就是一张脸。 */
+    var BODY2 = 0x3d1a5e, GUM = 0xc0164e, TOOTH = 0xfff6e9, EYE2 = 0xffe600;
+    baseY = 2.0;
+
+    /* 躯干：厚圆饼，边缘用略深的颜色压一圈，形成轮廓层次 */
+    var body = part(new THREE.CylinderGeometry(1.75, 1.6, 0.85, 16), BODY2, 1.03);
+    body.position.set(0, 0, -0.55);
+    g.add(body);
+
+    /* 头部平台：向前伸出一段，承载嘴巴 */
+    var snout = part(new THREE.CylinderGeometry(1.28, 1.45, 0.62, 14), 0x2c1145, 1.03);
+    snout.position.set(0, 0.06, 1.45);
+    g.add(snout);
+
+    /* 口腔：圆形深红坑，是俯视的第一视觉焦点 */
+    var gum = new THREE.Mesh(new THREE.CylinderGeometry(1.02, 0.9, 0.34, 18),
+      new THREE.MeshBasicMaterial({color: GUM}));
+    gum.position.set(0, 0.44, 1.6);
+    g.add(gum);
+    /* 口腔内圈再压一层更深的色，看起来有纵深 */
+    var throat = new THREE.Mesh(new THREE.CylinderGeometry(0.56, 0.34, 0.26, 14),
+      new THREE.MeshBasicMaterial({color: 0x3a0417}));
+    throat.position.set(0, 0.52, 1.6);
+    g.add(throat);
+    g.userData.jawD = gum;
+
+    /* 牙齿：沿口腔圆周均匀排 10 颗，全部朝圆心咬 */
+    for(var t3=0;t3<10;t3++){
+      var ta = t3 / 10 * TAU;
+      var tooth = part(new THREE.ConeGeometry(0.15, 0.52, 4), TOOTH, 1.0);
+      tooth.position.set(
+        Math.sin(ta) * 1.06,
+        0.5,
+        1.6 + Math.cos(ta) * 1.06
+      );
+      /* 锥体默认朝 +Y，往前倒 90° 让它横着指向圆心 */
+      tooth.rotation.set(Math.PI/2, 0, 0);
+      tooth.rotation.y = ta;
+      g.add(tooth);
+    }
+
+    /* 两只大眼，在嘴后方两侧，俯视清晰可见 */
+    [[-1.32, 0.62, 0.5], [1.32, 0.62, 0.5]].forEach(function(p5){
+      var ey = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 10),
+        new THREE.MeshBasicMaterial({color: EYE2}));
+      ey.position.set(p5[0], p5[1], p5[2]);
+      g.add(ey);
+      var pu = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6),
+        new THREE.MeshBasicMaterial({color: 0x0a0a12}));
+      pu.position.set(p5[0], p5[1] + 0.02, p5[2] + 0.2);
+      g.add(pu);
+    });
+
+    /* 背脊：五根洋红尖刺沿中线往后，俯视是几颗亮点 */
+    for(var sp3=0;sp3<5;sp3++){
+      var spike2 = part(new THREE.ConeGeometry(0.19, 0.9 - sp3*0.1, 5), COS.mag, 1.0);
+      spike2.position.set(0, 0.58, -0.2 - sp3 * 0.5);
+      g.add(spike2);
+    }
+
+    /* 四条腿：从饼的边缘向外伸，落地 */
+    [[-1.55, 0.15], [1.55, 0.15], [-1.45, -1.35], [1.45, -1.35]].forEach(function(p6){
+      var leg = part(new THREE.BoxGeometry(0.36, 1.5, 0.36), 0x22103a, 1.03);
+      leg.position.set(p6[0], -0.72, p6[1]);
+      leg.rotation.z = p6[0] > 0 ? -0.26 : 0.26;
+      g.add(leg);
+      var foot = part(new THREE.BoxGeometry(0.46, 0.24, 0.62), 0x22103a, 1.03);
+      foot.position.set(p6[0] * 1.2, -1.44, p6[1] + 0.06);
+      g.add(foot);
+    });
+
+    /* 贴地暗环 */
+    var ring = new THREE.Mesh(new THREE.RingGeometry(2.15, 2.85, 32),
+      new THREE.MeshBasicMaterial({color: COS.mag, transparent:true, opacity:0.32,
+        side:THREE.DoubleSide, depthWrite:false}));
+    ring.rotation.x = -Math.PI/2; ring.position.set(0, -1.5, -0.3);
+    g.add(ring);
+    g.userData.ring1 = ring;
   }
-  // 眼
-  var eye = new THREE.Mesh(new THREE.SphereGeometry(0.42, 12, 10),
-    new THREE.MeshBasicMaterial({color:0xff2e88}));
-  eye.position.set(0, 0.3, 1.85); g.add(eye);
-  var eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8),
-    new THREE.MeshBasicMaterial({color:0xffffff}));
-  eye2.position.set(0, 0.34, 2.12); g.add(eye2);
 
-  // 光环
-  var halo = new THREE.Mesh(new THREE.TorusGeometry(2.9, 0.09, 6, 40),
-    new THREE.MeshBasicMaterial({color:COS.cyn}));
-  halo.rotation.x = Math.PI/2; halo.position.y = -0.4;
-  g.add(halo);
-  g.userData.halo = halo;
-
-  g.position.set(x, 2.1, z);
+  g.scale.setScalar(1.15);
+  g.position.set(x, baseY - 6, z);
   scene.add(g);
+
   return {
-    obj:g, x:x, z:z, hp:hp, maxhp:hp, r:2.1, dmg:26, ang:0,
-    dead:false, boss:true, t:0, cd:2, dashCd:4, dash:0, dashDir:{x:0,z:1},
-    spawnCd:5, phase:0
+    obj: g, x: x, z: z, hp: hp, maxhp: hp,
+    kind: kind,
+    r: kind === 'hands' ? 2.1 : 2.3,
+    dmg: kind === 'hands' ? 24 : 30,
+    baseY: baseY,
+    ang: 0, t: 0, dead: false, boss: true,
+    rise: 1.5, riseMax: 1.5,
+    state: 'idle', stateT: 0,
+    cd: 2.2, dashCd: 3.4, slamCd: 5.5, tpCd: 5.0, orbCd: 3.6,
+    dashDir: {x:0, z:1},
+    rage: false
   };
 }
+
 function killBoss(){
   if(!boss) return;
   burst(boss.x, 2.2, boss.z, COS.mag, 40, 15, 1.6);
@@ -2061,6 +2222,7 @@ function killBoss(){
   shake(0.8);
   SFX.boss();
   BGM.setMode('battle');
+  bossBar.style.display = 'none';
   boss = null;
 }
 
@@ -2829,11 +2991,8 @@ canvas.addEventListener('pointercancel', endStick);
 var bossBar = document.createElement('div');
 bossBar.style.cssText = 'position:absolute;left:50%;top:132px;transform:translateX(-50%);' +
   'width:min(420px,74vw);display:none;pointer-events:none';
-bossBar.innerHTML = '<div style="font-family:var(--disp);font-size:11px;letter-spacing:.28em;' +
-  'color:#ff2e88;text-align:center;text-shadow:2px 2px 0 #0a0a12;margin-bottom:3px">MOLOCH · 墨魔王</div>' +
-  '<div style="height:12px;background:rgba(10,10,18,.85);border:3px solid #0a0a12">' +
-  '<i id="bosshp" style="display:block;height:100%;width:100%;' +
-  'background:linear-gradient(90deg,#7b2ff7,#ff2e88,#ffe600);transition:width .1s"></i></div>';
+/* 初始只留空壳，名字和配色由 setBossBar() 按 BOSS 类型填 */
+bossBar.innerHTML = '';
 $('hud').appendChild(bossBar);
 
 function fmtTime(t){
@@ -2914,6 +3073,9 @@ function spawnRing(){
 }
 
 function updateSpawn(dt){
+  /* BOSS 在场（且已经升起）时不刷小兵。
+     这是「单挑」成立的前提：玩家只需要读 BOSS 的招式，不用同时躲杂兵。 */
+  if(boss && !boss.dead) return;
   var wc = waveCurve(S.wave, S.waveLen ? S.waveT/S.waveLen : 0);
   var rate = (1.35 + S.wave*0.5) * wc.rate * S.spawnMul;
   var cap = Math.min(MAX_ENEMY, 24 + S.wave*13) * (S.spawnMul > 1.4 ? 1.25 : 1);
@@ -2943,23 +3105,84 @@ function nextWave(){
    改武器或被动参数后，必须重跑 build_numbers.py 同步这张表。 */
 var EXPECTED_DPS = [13, 32, 87, 127, 451, 693, 760, 1227, 1629, 2387];
 
-function spawnBoss(){
-  if(boss){ scene.remove(boss.obj); boss = null; }
-  var ed = EXPECTED_DPS[clamp(S.wave, 1, 10) - 1];
-  var targetTtk = S.wave >= 10 ? 18 : 12;
-  var hp = Math.round(ed * targetTtk);
-  var a = Math.random()*TAU, r = 16;
-  var bx = clamp(Math.cos(a)*r, -ARENA_R+6, ARENA_R-6);
-  var bz = clamp(Math.sin(a)*r, -ARENA_R+6, ARENA_R-6);
-  boss = buildBoss(bx, bz, hp);
-  bossSpawned = true;
-  SFX.boss(); flash(0.5); shake(1.1);
-  BGM.setMode('boss');
-  toast('BOSS 降临', '#ff2e88');
-  shock(bx, bz, COS.mag, 12, 0.9);
+/* 清场：BOSS 登场时小兵全部震散。
+   以前是小兵和 BOSS 混在一起打，玩家分不清该躲谁，
+   BOSS 的招式也全被杂兵挡住。现在先清场再单挑。 */
+function clearMinionsForBoss(){
+  var total = 0;
+  EKEYS.forEach(function(k){
+    var list = E[k];
+    total += list.length;
+    for(var i=0;i<list.length;i++){
+      var e = list[i];
+      burst(e.x, 0.7, e.z, ETYPES[k].color, 4, 6, 0.55);
+      /* 原来每只小兵掉一颗经验球，一清场就是满地绿点，把 BOSS 的
+         弹幕和冲锋预警全遮住了。改成只有 1/4 概率掉，够补一点经验就行。 */
+      if(Math.random() < 0.25) spawnGem(e.x, e.z, 1);
+    }
+    list.length = 0;
+  });
+  return total;
 }
 
-/* ═══════════ 玩家更新 ═══════════ */
+function spawnBoss(){
+  if(boss){ scene.remove(boss.obj); boss = null; }
+
+  var kind = S.wave >= 10 ? 'hands' : 'maw';
+
+  /* 血量按「预估 DPS × 目标秒数」派生，不是常数。
+     BOSS 期间不刷小兵，玩家可以全力输出，所以目标秒数比之前长：
+     第 5 波 16 秒、第 10 波 28 秒，配合狂暴阶段形成两段压力。 */
+  var ed = EXPECTED_DPS[clamp(S.wave, 1, 10) - 1];
+  var targetTtk = kind === 'hands' ? 28 : 16;
+  var hp = Math.round(ed * targetTtk);
+
+  /* ── 出场序列：清场 → 白闪震屏 → 从地下升起 ── */
+  var cleared = clearMinionsForBoss();
+  if(cleared > 0) SFX.kill();
+  flash(0.42); shake(1.2);
+  shock(hero.x, hero.z, COS.cyn, 18, 0.8);
+  speedLines(0.85, 260);
+
+  /* 生成在玩家「正前方 9 单位」而不是地图随机点：
+     随机点常常落在视野边缘，玩家听到 BOSS 音乐却找不到它。
+     取玩家当前朝向（hero.ang），保证一登场就在镜头里。 */
+  var fa = hero.ang || 0;
+  var bx = clamp(hero.x + Math.sin(fa) * 9, -ARENA_R+6, ARENA_R-6);
+  var bz = clamp(hero.z + Math.cos(fa) * 9, -ARENA_R+6, ARENA_R-6);
+
+  boss = buildBoss(bx, bz, hp, kind);
+  bossSpawned = true;
+
+  setBossBar(kind);
+  bossBar.style.display = 'block';
+
+  SFX.boss();
+  BGM.setMode('boss');
+  popWord(kind === 'hands' ? '千手墨神' : '裂口巨兽', innerWidth/2, innerHeight*0.3,
+          kind === 'hands' ? '#00e5ff' : '#ff2e88', 58);
+  toast('小兵已被震散 · 单挑开始', '#ffe600');
+  shock(bx, bz, COS.mag, 13, 0.9);
+}
+
+function setBossBar(kind){
+  var name = kind === 'hands' ? '千手墨神' : '裂口巨兽';
+  var sub  = kind === 'hands' ? '第 10 波 · 八臂弹幕 · 会瞬移' : '第 5 波 · 巨颚冲锋 · 震地';
+  var col  = kind === 'hands' ? '#00e5ff' : '#ff2e88';
+  var grad = kind === 'hands'
+    ? 'linear-gradient(90deg,#141033,#00e5ff,#ffe600)'
+    : 'linear-gradient(90deg,#7b2ff7,#ff2e88,#ffe600)';
+  bossBar.innerHTML =
+    '<div style="font-family:var(--disp);font-size:14px;letter-spacing:.22em;' +
+      'color:' + col + ';text-align:center;text-shadow:2px 2px 0 #0a0a12">' + name + '</div>' +
+    '<div style="font-size:9px;letter-spacing:.12em;color:#cfd6e4;text-align:center;' +
+      'margin-bottom:3px;text-shadow:1px 1px 0 #0a0a12">' + sub + '</div>' +
+    '<div style="height:13px;background:rgba(10,10,18,.85);border:3px solid #0a0a12">' +
+      '<i id="bosshp" style="display:block;height:100%;width:100%;background:' + grad +
+      ';transition:width .1s"></i></div>';
+}
+
+
 function angLerp(a, b, t){
   var d = ((b - a + Math.PI) % TAU + TAU) % TAU - Math.PI;
   return a + d*t;
@@ -3095,59 +3318,179 @@ function updateBoss(dt){
   if(!boss) return;
   var b = boss;
   b.t += dt;
+
+  /* ── 出场：从地下升起来 ──
+     升的这 1.5 秒里既不动也不攻击，玩家有时间看清它长什么样。 */
+  if(b.rise > 0){
+    b.rise -= dt;
+    var k = 1 - Math.max(0, b.rise) / b.riseMax;
+    var e = k < 0.82 ? (k/0.82) : 1;
+    b.obj.position.set(b.x, lerp(b.baseY - 6, b.baseY, e), b.z);
+    b.obj.rotation.y = b.ang + (1 - e) * 5.5;
+    if(b.rise <= 0){
+      b.obj.position.y = b.baseY;
+      shake(1.0); flash(0.28);
+      shock(b.x, b.z, COS.yel, 15, 0.85);
+      burst(b.x, 0.6, b.z, COS.mag, 22, 11, 1.3);
+      SFX.boss();
+    }
+    return;
+  }
+
+  /* 血量过半进狂暴：招式更快，这是「有挑战感」的来源之一 */
+  if(!b.rage && b.hp < b.maxhp * 0.5){
+    b.rage = true;
+    flash(0.3); shake(0.7);
+    shock(b.x, b.z, COS.red, 9, 0.6);
+    toast(b.kind === 'hands' ? '千手墨神 · 狂怒' : '裂口巨兽 · 狂怒', '#ff2e88');
+    SFX.boss();
+  }
+  var rageK = b.rage ? 1.35 : 1;
+
+  if(b.kind === 'hands') updateHandsBoss(b, dt, rageK);
+  else updateMawBoss(b, dt, rageK);
+}
+
+/* ── 裂口巨兽：贴地追击 + 蓄力冲锋 + 震地环 ── */
+function updateMawBoss(b, dt, rageK){
   var dx = hero.x - b.x, dz = hero.z - b.z;
   var d = Math.hypot(dx, dz) || 1;
   b.ang = Math.atan2(dx, dz);
-
-  b.obj.position.set(b.x, 2.1 + Math.sin(b.t*2.2)*0.22, b.z);
   b.obj.rotation.y = b.ang;
-  b.obj.userData.halo.rotation.z += dt*2.2;
+  b.obj.position.set(b.x, b.baseY + Math.sin(b.t * 3.2) * 0.06, b.z);
 
-  b.cd -= dt; b.dashCd -= dt; b.spawnCd -= dt;
+  b.dashCd -= dt * rageK;
+  b.slamCd -= dt * rageK;
 
-  if(b.dash > 0){
-    b.dash -= dt;
-    b.x += b.dashDir.x * 24 * dt;
-    b.z += b.dashDir.z * 24 * dt;
+  if(b.state === 'windup'){
+    b.stateT -= dt;
+    var q = 1 - Math.max(0, b.stateT) / 0.62;
+    /* 蓄力时身体后坐、压扁，让玩家看得出「要冲了」 */
+    b.obj.scale.set(1 + q*0.14, 1 - q*0.16, 1 + q*0.22);
+    if(b.stateT <= 0){
+      b.state = 'dash'; b.stateT = 0.78;
+      b.dashDir = {x: dx/d, z: dz/d};
+      b.obj.scale.set(1, 1, 1);
+      SFX.boss(); shake(0.55);
+    }
+  } else if(b.state === 'dash'){
+    b.stateT -= dt;
+    b.x += b.dashDir.x * 36 * dt;
+    b.z += b.dashDir.z * 36 * dt;
+    burst(b.x - b.dashDir.x*1.6, 0.7, b.z - b.dashDir.z*1.6, COS.mag, 2, 5, 0.55);
+    if(b.stateT <= 0){ b.state = 'idle'; b.stateT = 0.75; }
   } else {
-    b.x += (dx/d) * 3.6 * dt;
-    b.z += (dz/d) * 3.6 * dt;
-    if(b.dashCd <= 0){
-      b.dashCd = 4.4; b.dash = 0.62;
-      b.dashDir = {x:dx/d, z:dz/d};
-      shock(b.x, b.z, COS.yel, 5, 0.4);
-      SFX.boss();
+    b.stateT -= dt;
+    b.x += (dx/d) * 3.4 * dt;
+    b.z += (dz/d) * 3.4 * dt;
+    if(b.dashCd <= 0 && d > 4.5){
+      b.dashCd = 4.6;
+      b.state = 'windup'; b.stateT = 0.62;
+      shock(b.x, b.z, COS.red, 3.4, 0.5);
     }
   }
 
-  var lim = ARENA_R - 3;
+  /* 震地：十八方向冲击弹，逼玩家离开近身 */
+  if(b.slamCd <= 0){
+    b.slamCd = 6.6;
+    for(var i=0;i<18;i++){
+      var a = i/18*TAU;
+      spawnEBullet(b.x, b.z, Math.cos(a)*12, Math.sin(a)*12, 18);
+    }
+    shock(b.x, b.z, COS.yel, 11, 0.7);
+    shake(1.0); SFX.boss();
+  }
+
+  /* 身体接触伤害 */
+  if(d < b.r + 0.7) hurtHero(b.dmg);
+
+  var lim = ARENA_R - 4;
   var dd = Math.hypot(b.x, b.z);
   if(dd > lim){ b.x = b.x/dd*lim; b.z = b.z/dd*lim; }
+}
 
-  // 环形弹幕
-  if(b.cd <= 0){
-    b.cd = 2.9;
-    var n = 12;
-    for(var i=0;i<n;i++){
-      var a = i/n*TAU + b.t;
-      spawnEBullet(b.x, b.z, Math.cos(a)*10, Math.sin(a)*10, 14);
+/* ── 千手墨神：悬浮保持距离 + 环形弹幕 + 追踪弹 + 瞬移 ── */
+function updateHandsBoss(b, dt, rageK){
+  var dx = hero.x - b.x, dz = hero.z - b.z;
+  var d = Math.hypot(dx, dz) || 1;
+  b.ang = Math.atan2(dx, dz);
+  b.obj.rotation.y = b.ang;
+  b.obj.position.set(b.x, b.baseY + Math.sin(b.t * 1.8) * 0.38, b.z);
+
+  /* 八臂摆动 */
+  var arms = b.obj.userData.arms;
+  if(arms){
+    for(var i2=0;i2<arms.length;i2++){
+      var ud = arms[i2].userData;
+      if(ud.baseAng === undefined) continue;   // 防御：没有基准角就不动，绝不算 NaN
+      /* 只叠加「绕 Y 轴的小幅摆动」和「上下起伏」，不改 Z 轴，
+         这样八条手臂始终平铺在水平面上，俯视一直是放射状。 */
+      arms[i2].rotation.y = ud.baseAng + Math.sin(b.t * 2.4 + ud.phase) * 0.18;
+      arms[i2].rotation.x = Math.sin(b.t * 3.1 + ud.phase) * 0.13;
     }
-    shock(b.x, b.z, COS.mag, 4.5, 0.4);
+  }
+  /* 双环反向转 */
+  if(b.obj.userData.ring1) b.obj.userData.ring1.rotation.z += dt * 1.6;
+  if(b.obj.userData.ring2) b.obj.userData.ring2.rotation.z -= dt * 2.4;
+  /* 瞳孔追玩家 */
+  if(b.obj.userData.pupil){
+    b.obj.userData.pupil.position.x = clamp(dx/d * 0.16, -0.2, 0.2);
+    b.obj.userData.pupil.position.z = 0.85;
+  }
+
+  b.cd -= dt * rageK;
+  b.orbCd -= dt * rageK;
+  b.tpCd -= dt;
+
+  /* 保持 9.5 单位距离：太近后退，太远靠近 */
+  var want = 9.5;
+  var mv = d < want - 2.2 ? -3.6 : (d > want + 2.2 ? 3.0 : 0);
+  b.x += (dx/d) * mv * dt;
+  b.z += (dz/d) * mv * dt;
+
+  /* 环形弹幕：十六发，带旋转偏移，两层交替 */
+  if(b.cd <= 0){
+    b.cd = 3.4;
+    var cnt = b.rage ? 22 : 16;
+    for(var i3=0;i3<cnt;i3++){
+      var a2 = i3/cnt*TAU + b.t * 0.55;
+      spawnEBullet(b.x, b.z, Math.cos(a2)*11, Math.sin(a2)*11, 15);
+    }
+    shock(b.x, b.z, COS.cyn, 4.8, 0.4);
     SFX.laser();
   }
-  // 召唤
-  if(b.spawnCd <= 0){
-    b.spawnCd = 6.4;
-    for(var s=0;s<4;s++){
-      var aa = Math.random()*TAU;
-      spawnEnemy(pick(['blob','spiker']), b.x + Math.cos(aa)*4, b.z + Math.sin(aa)*4, {hpMul:1.3});
+
+  /* 追踪弹：朝玩家 ±0.26 弧度三连 */
+  if(b.orbCd <= 0){
+    b.orbCd = 6.0;
+    var base = Math.atan2(dx, dz);
+    for(var k3=-1;k3<=1;k3++){
+      var a3 = base + k3 * 0.26;
+      spawnEBullet(b.x, b.z, Math.sin(a3)*14.5, Math.cos(a3)*14.5, 17);
     }
+    SFX.boss();
+  }
+
+  /* 瞬移：消失在青色粒子中，出现在玩家周身 8 单位处 */
+  if(b.tpCd <= 0){
+    b.tpCd = 7.5;
+    burst(b.x, 1.6, b.z, COS.cyn, 18, 9, 1.0);
+    var a4 = Math.random()*TAU;
+    b.x = clamp(hero.x + Math.cos(a4)*8.5, -ARENA_R+5, ARENA_R-5);
+    b.z = clamp(hero.z + Math.sin(a4)*8.5, -ARENA_R+5, ARENA_R-5);
+    burst(b.x, 1.6, b.z, COS.mag, 20, 10, 1.0);
+    shock(b.x, b.z, COS.cyn, 5, 0.5);
+    SFX.whooshDown();
   }
 
   if(d < b.r + 0.6) hurtHero(b.dmg);
+
+  var lim2 = ARENA_R - 4;
+  var dd2 = Math.hypot(b.x, b.z);
+  if(dd2 > lim2){ b.x = b.x/dd2*lim2; b.z = b.z/dd2*lim2; }
 }
 
-/* ═══════════ 子弹更新 ═══════════ */
+
 function bulletHit(b, listArr, isEnemyList){}
 
 function updateBulletArr(arr, dt){
@@ -3398,8 +3741,12 @@ function update(dt){
   updateChests(worldDt);
   updateSpawn(worldDt);
 
-  S.waveT += dt;
-  if(S.waveT >= S.waveLen && S.wave < 10) nextWave();
+  /* BOSS 在场时波次计时暂停，否则第 5 波 34 秒一到就直接跳第 6 波，
+     BOSS 还在场上，两波叠在一起打。 */
+  if(!(boss && !boss.dead)){
+    S.waveT += dt;
+    if(S.waveT >= S.waveLen && S.wave < 10) nextWave();
+  }
 
   // 渲染同步
   renderEnemies();
