@@ -47,10 +47,10 @@
   "range": 1.06
  },
  "dist": {
-  "arch": 7,
-  "general": 15,
-  "wup": 17,
-  "wnew": 21,
+  "arch": 11,
+  "general": 16,
+  "wup": 19,
+  "wnew": 14,
   "other": 0
  },
  "evoTest": [
