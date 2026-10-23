@@ -31,7 +31,10 @@ const WAVE = Number(getArg('wave', 5));
 const LV = Number(getArg('lv', WAVE >= 10 ? 24 : 14));
 const RUNS = Number(getArg('runs', 1));
 
-const STRATS = ['balanced', 'rush', 'passive', 'random'];
+const onlyIdx = process.argv.indexOf('--only');
+const STRATS = onlyIdx > 0
+  ? [process.argv[onlyIdx + 1]]
+  : ['balanced', 'rush', 'passive', 'random'];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const RESULT_DIR = path.join(ROOT, 'tests', 'results');
@@ -97,9 +100,12 @@ function runAgent(port, strat, round){
 console.log(`跑 ${STRATS.length * RUNS} 个智能体（${STRATS.length} 策略 × ${RUNS} 轮），每轮约 40-90 秒…`);
 const finished = [];
 for(let r = 1; r <= RUNS; r++){
-  const round = STRATS.map((strat, i) => runAgent(9951 + i, strat, r));
-  const done = await Promise.all(round);
-  finished.push(...done);
+  /* 每轮分两批跑（2 个并行）。4 个软件渲染实例同时开会把帧率压到个位数，
+     而主循环 dt 上限 0.05 会让游戏时间严重变慢，测一轮要十几分钟。 */
+  for(let b = 0; b < STRATS.length; b += 2){
+    const batch = STRATS.slice(b, b + 2).map((strat, i) => runAgent(9951 + b + i, strat, r));
+    finished.push(...await Promise.all(batch));
+  }
   console.log(`  第 ${r}/${RUNS} 轮完成`);
 }
 
@@ -148,7 +154,7 @@ if(ttks.length){
   const avg = ttks.reduce((a, b) => a + b, 0) / ttks.length;
   const min = Math.min(...ttks);
   const max = Math.max(...ttks);
-  const target = WAVE >= 10 ? 20 : 12;
+  const target = WAVE >= 10 ? 45 : 32;
   console.log(`\n平均 TTK：${avg.toFixed(1)} 秒　范围：${min.toFixed(1)} – ${max.toFixed(1)} 秒　设计目标：${target} 秒`);
   console.log(`偏差：${(avg / target).toFixed(2)}×（低于 0.6 就是「被打得太快」）`);
   console.log(avg < target * 0.6

@@ -1,0 +1,60 @@
+{
+ "swift": {
+  "w": [
+   "bow:1"
+  ],
+  "p": {
+   "move": 1,
+   "shot": 1
+  },
+  "arch": {
+   "melee": 1,
+   "throw": 1,
+   "shot": 1.2
+  },
+  "n": {
+   "melee": 0,
+   "throw": 0,
+   "shot": 1
+  }
+ },
+ "tank": {
+  "w": [
+   "scythe:1"
+  ],
+  "p": {
+   "hp": 1,
+   "melee": 1
+  },
+  "arch": {
+   "melee": 1.2,
+   "throw": 1,
+   "shot": 1
+  },
+  "n": {
+   "melee": 1,
+   "throw": 0,
+   "shot": 0
+  }
+ },
+ "setTest": {
+  "n": {
+   "melee": 2,
+   "throw": 0,
+   "shot": 0
+  },
+  "mul": 1.56,
+  "range": 1.06
+ },
+ "dist": {
+  "arch": 7,
+  "general": 15,
+  "wup": 17,
+  "wnew": 21,
+  "other": 0
+ },
+ "evoTest": [
+  "scythe"
+ ],
+ "errs": []
+}

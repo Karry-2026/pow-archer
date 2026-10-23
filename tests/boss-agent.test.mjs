@@ -63,13 +63,17 @@ const installed = await ev(`(function(){
     var cards = Array.prototype.slice.call(document.querySelectorAll('#cards .card'));
     if(!cards.length) return false;
 
+    /* 卡片分类优先用 class（stable），文字只做兜底。
+       流派系统改版后 kd 文案变成「流派精通 · 贴身线」「贴身线 · 会占一个槽位」，
+       靠文字匹配会全部落到 other，智能体就永远不会点流派卡。 */
     var scored = cards.map(function(el){
       var kd = (el.querySelector('.kd') || {}).textContent || '';
       var kind = 'other';
-      if(kd.indexOf('超武') >= 0 || el.classList.contains('evoc')) kind = 'evo';
-      else if(kd.indexOf('新武器') >= 0) kind = 'new';
+      if(el.classList.contains('evoc') || kd.indexOf('超武') >= 0) kind = 'evo';
+      else if(el.classList.contains('newc') || kd.indexOf('槽位') >= 0) kind = 'new';
+      else if(el.classList.contains('archc') || kd.indexOf('流派精通') >= 0) kind = 'pas';
       else if(kd.indexOf('武器') >= 0) kind = 'wup';
-      else if(kd.indexOf('被动') >= 0) kind = 'pas';
+      else if(kd.indexOf('被动') >= 0 || kd.indexOf('通用') >= 0) kind = 'pas';
       else if(kd.indexOf('突破') >= 0) kind = 'limit';
       else if(kd.indexOf('回复') >= 0) kind = 'heal';
       return { el: el, kind: kind, kd: kd };
@@ -134,6 +138,11 @@ const installed = await ev(`(function(){
   };
 
   /* 召 BOSS 并逐帧记录血量 */
+  /* 超武蓄满就放（真人会这么做）。不放的话测出来的时长会偏长。 */
+  window.__ultTick = setInterval(function(){
+    if(POW.S.mode === 'play' && POW.hero.ult && POW.hero.ult.charge >= 1) POW.triggerUlt();
+  }, 400);
+
   window.__runBoss = function(wave, done){
     /* 关键：升级循环结束时可能还停在 level 状态（还有排队未处理的升级）。
        不切回 play 的话 update() 不跑，BOSS 不动、武器不开火，
@@ -148,16 +157,22 @@ const installed = await ev(`(function(){
     POW.hero.hp = POW.hero.maxhp = 999999;    /* 不让玩家死，测的是输出而不是生存 */
 
     var t0 = 0, last = 0, samples = [], raged = false, curve = [];
+    /* 用「游戏时间」而不是墙钟计时。
+       无头浏览器是软渲染，4 个实例并行时帧率会掉到个位数，
+       而主循环把 dt 上限钳在 0.05 —— 于是游戏时间比墙钟慢好几倍，
+       用墙钟测出来的 TTK 会被虚高 4-5 倍（第一轮全部"超时"就是这么来的）。 */
+    var g0 = 0;
     setTimeout(function(){
       POW.spawnBoss();
       t0 = performance.now();
+      g0 = POW.S.t;
       last = t0;
       var hp0 = POW.boss ? POW.boss.hp : 0;
 
       function tick(){
         var now = performance.now();
         if(!POW.boss || POW.boss.dead){
-          var total = (now - t0) / 1000;
+          var total = POW.S.t - g0;      /* 游戏秒 */
           /* 取 1 秒处的血量，算「见面第一秒掉了百分之几」 */
           var at1s = hp0;
           for(var q=0;q<samples.length;q++){
@@ -181,8 +196,8 @@ const installed = await ev(`(function(){
           curve.push(Math.round(POW.boss.hp));
           last = now;
         }
-        if(now - t0 > 90000){
-          done({ kind: POW.boss.kind, hp0: hp0, ttk: 90, timeout: true,
+        if(POW.S.t - g0 > 70){
+          done({ kind: POW.boss.kind, hp0: hp0, ttk: 70, timeout: true,
                  samples: samples.length, raged: raged, curve: curve,
                  remainPct: +(POW.boss.hp / POW.boss.maxhp * 100).toFixed(1) });
           return;

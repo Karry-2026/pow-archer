@@ -361,9 +361,11 @@ footer{
    ↓
 <span class="c">自动攻击最近的敌人</span>  →  <span class="c">击杀掉经验球</span>  →  <span class="c">球自动飞来</span>
    ↓
-<span class="k">升级三选一</span>  →  <span class="c">武器形态 / 新武器 / 被动</span>
+<span class="k">升级三选一</span>  →  <span class="c">武器形态 / 新武器 / 流派精通</span>
    ↓
-<span class="c">武器满级 + 被动 3 级</span>  →  <span class="k">超武进化（整局只能选一个）</span>
+<span class="c">武器满级 + 同流派精通 3 级</span>  →  <span class="k">超武进化（整局只能选一个）</span>
+   ↓
+<span class="c">蓄力环转满</span>  →  <span class="k">按空格放超武必杀</span>
    ↓
 <span class="c">第 5 波 / 第 10 波</span>  →  <span class="k">清场 + BOSS 单挑</span>
    ↓
@@ -378,6 +380,9 @@ footer{
       <tr><td><b>自动索敌</b></td><td><span class="tag t-ok">完成</span></td><td>每把武器各自锁最近的敌人</td><td>武器越多越乱，这是刻意的：多武器要付出手感代价</td></tr>
       <tr><td><b>升级三选一</b></td><td><span class="tag t-ok">完成</span></td><td>武器升级 / 新武器 / 被动 / 超武 / 治疗</td><td>卡池永不为空：满级武器可以无限叠「极限突破」</td></tr>
       <tr><td><b>超武进化</b></td><td><span class="tag t-ok">完成</span></td><td>6 把武器各 1 个进化形态</td><td>整局只能选一个，选完锁定，逼迫玩家确定流派</td></tr>
+      <tr><td><b>流派精通</b></td><td><span class="tag t-ok">v0.10</span></td><td>3 条线（贴身 / 投掷 / 射击）各 1 张精通卡</td><td>精通只加成自己那条线的 2 把武器 —— 混着点会摊薄，这就是取舍的来源</td></tr>
+      <tr><td><b>超武必杀</b></td><td><span class="tag t-ok">v0.10</span></td><td>蓄力环 + 空格释放，每个超武一种形态变化</td><td>让进化不只是「数值变大」，多一个可以等、可以放的节奏点</td></tr>
+      <tr><td><b>震屏</b></td><td><span class="tag t-ok">v0.10</span></td><td>trauma 累加 + 平方映射</td><td>连炸要合成一次长震；原来用 max 会让 4 颗炸弹抽 4 下</td></tr>
       <tr><td><b>宝箱</b></td><td><span class="tag t-ok">完成</span></td><td>升级已有武器 / 加被动</td><td><b>不给新武器</b>。武器是构筑决策，必须玩家自己选</td></tr>
       <tr><td><b>背包</b></td><td><span class="tag t-ok">完成</span></td><td>4 武器槽 + 6 被动槽，可弃用</td><td>槽满时必须弃一把才能换流派，这是取舍点</td></tr>
       <tr><td><b>刷怪密度</b></td><td><span class="tag t-ok">完成</span></td><td>4 档：悠闲 / 标准 / 狂暴 / 地狱</td><td>开局选，局内暂停还能再调</td></tr>
@@ -554,10 +559,11 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   </div>
 
   <h2>BOSS 血量怎么来的</h2>
-  <pre>hp = max(260, 玩家当前单目标 DPS × 目标秒数)
+  <pre>hp = max(260, 玩家当前单目标 DPS × 目标墙钟秒数)
 
-单目标 DPS = estimateDPS(single) × (1 + 暴击率 × 1.0)
-目标秒数   = 裂口巨兽 12 秒 / 千手墨神 20 秒</pre>
+单目标 DPS = estimateDPS(single, 含 sHit 命中率修正) × (1 + 暴击率)
+目标墙钟   = 裂口巨兽 32 秒 / 千手墨神 45 秒
+其中 7 秒是 BOSS 无敌（转阶段 4.5s + 狂暴 2.5s），由超武必杀补回来</pre>
   <p><strong>血量在开战那一刻现算，不是查表。</strong>谁打都是同一个时长——这是「不被秒杀、也不打不动」的唯一解。</p>
 
   <h3>为什么不用查表</h3>
@@ -582,7 +588,8 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
     <tbody>
       <tr><td><b>单目标口径</b></td><td><code>estimateDPS(true)</code> 不乘「清怪系数」</td><td>镰刀 2.6、地刺 4.6 的系数会把血量高估 2-4 倍。血月斩对着一只 BOSS 不会打出四倍输出</td></tr>
       <tr><td><b>补暴击期望</b></td><td><code>× (1 + 暴击率 × 1.0)</code></td><td>原本只算基础伤害，高暴击配装的 BOSS 会被低估</td></tr>
-      <tr><td><b>目标秒数 ≠ 墙钟秒数</b></td><td>设 12/20 秒，实测墙钟 6.5-21.9 秒</td><td>玩家要躲招，有效输出只占 60-75%。按理论秒数配血会偏厚</td></tr>
+      <tr><td><b>sHit 命中率</b></td><td>扇形武器按「实际命中率」折算，弓箭 0.50、飞镖 0.62</td><td>不修的话 BOSS 硬一倍：12 支箭扇开，对着单个目标只中一半</td></tr>
+      <tr><td><b>无敌窗口不算血</b></td><td>7 秒无敌 + 超武 +35% 输出，两者相抵，血量按墙钟算</td><td>只扣无敌不补超武，实测比目标短 6 秒（26.2 vs 32）</td></tr>
     </tbody>
   </table>
   </div>
@@ -655,6 +662,11 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <div class="ed">斑点的根因不是贴图重合，是描边用「整体放大 13%」，对头部这种小部件会把整个头包成黑色。改成沿法线外扩固定厚度。同时加竖屏遮罩、超武唯一性、文案去英文缩写。</div>
     </div>
     <div class="ev">
+      <div class="et">v0.10 · 构筑系统</div>
+      <div class="en">从「乱加点」变成「选一条线」</div>
+      <div class="ed">6 个全局乘区被动换成 3 张流派精通 + 3 张通用；同线双持给套装加成；卡池加权把玩家往一条线上推；超武前置改成本流派 3 级。六个超武各加一个蓄力必杀（空格释放）。震屏改 trauma 累加，投掷手加 0.45 秒抬手预警，敌弹换成洋红 + 白核 + 黑壳 + 拖尾。BOSS 拉到 32/45 秒，靠转阶段与护盾而不是堆血。</div>
+    </div>
+    <div class="ev">
       <div class="et">v0.5 · 数值重做</div>
       <div class="en">发现玩家 DPS 涨 259 倍、敌人只涨 3 倍</div>
       <div class="ed">两条曲线在第 4 波交叉后再无交集，所以「前期打不动、后期全是纸、BOSS 最脆」。改成敌人血量指数增长、BOSS 血量按 DPS 派生、武器调平（最强最弱从 2.7 倍收到 1.26 倍）。</div>
@@ -705,6 +717,9 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <tr><td>经验球看不清</td><td>地面明度 95、经验球 78，物体比背景暗，同属蓝青色系</td><td>先测灰阶再调色。只靠色相不算修好</td></tr>
       <tr><td>BOSS 有时秒杀、有时打不动</td><td>血量用查表值，跟玩家实际配装脱节</td><td>血量要跟随玩家强度，不能跟随「期望强度」</td></tr>
       <tr><td>四个测试智能体全部超时</td><td>测试脚本没把游戏从升级界面切回 play，整局都在暂停</td><td>测试写错了不会报错，只会给出「全都打不过」的假结论</td></tr>
+      <tr><td>丢 4 个炸弹震 4 下</td><td><code>shake()</code> 用 <code>Math.max</code>，每次爆炸把震动顶回同一强度，等于 4 次独立脉冲</td><td>震动要用 trauma 累加 + 封顶，连击才会合成一次长震（GDC 相机抖动模型）</td></tr>
+      <tr><td>远程怪打过来没有预警</td><td>投掷手冷却一到直接生成子弹，零前摇；且敌弹是黄色，和经验球/爆炸撞色</td><td>威胁色必须独占色系。黄橙子弹是弹幕游戏公认的坏选择</td></tr>
+      <tr><td>平衡测试全部「超时」</td><td>用墙钟计时，而软渲染把帧率压到个位数、主循环 dt 上限 0.05 → 游戏时间比墙钟慢几倍</td><td>测游戏内时长要用游戏时钟（<code>S.t</code>），不能用 <code>performance.now()</code></td></tr>
       <tr><td>千手墨神的手臂全消失</td><td>动画读 <code>userData.rz</code>，新模型没写 → <code>undefined + 数字 = NaN</code></td><td>NaN 不会报错，只会让矩阵失效。新模型必须补齐动画依赖的字段</td></tr>
     </tbody>
   </table>
@@ -761,6 +776,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <tr><td>移动</td><td>WASD / 方向键</td><td>拖拽左半屏</td></tr>
       <tr><td>攻击</td><td>自动，无需操作</td><td>自动</td></tr>
       <tr><td>背包</td><td>TAB</td><td>点背包按钮</td></tr>
+      <tr><td><b>超武必杀</b></td><td><b>空格</b>（蓄力满了才有效）</td><td>点右下角蓄力环</td></tr>
       <tr><td>暂停</td><td>ESC</td><td>点暂停按钮</td></tr>
       <tr><td>静音</td><td>M</td><td>点左上角喇叭</td></tr>
     </tbody>
