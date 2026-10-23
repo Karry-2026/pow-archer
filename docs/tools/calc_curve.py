@@ -112,4 +112,4 @@ if ok < 10:
     print("需要把上面「DPS(实算)」列四舍五入后写回 index.html 的 EXPECTED_DPS")
     print("建议数组：[" + ", ".join(str(round(dps_of(l, a, b, c)[0])) for _, l, a, b, c in BUILD) + "]")
     sys.exit(1)
-print("EXPECTED_DPS 与武器参数一致，BOSS 血量派生值可信")
+print("EXPECTED_DPS 与武器参数一致（这张表是标准配装参考值；BOSS 血量另有按实时 DPS 的派生逻辑）")
