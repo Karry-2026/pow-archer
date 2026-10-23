@@ -383,6 +383,7 @@ footer{
       <tr><td><b>刷怪密度</b></td><td><span class="tag t-ok">完成</span></td><td>4 档：悠闲 / 标准 / 狂暴 / 地狱</td><td>开局选，局内暂停还能再调</td></tr>
       <tr><td><b>精英怪</b></td><td><span class="tag t-ok">完成</span></td><td>第 3 波起出现，8 倍血 1.7 倍伤</td><td>给玩家一个「值得绕路去打」的目标</td></tr>
       <tr><td><b>BOSS</b></td><td><span class="tag t-ok">完成</span></td><td>两个完全不同的异兽</td><td>清场单挑，血量按 DPS 派生，血量过半进狂暴</td></tr>
+      <tr><td><b>结算</b></td><td><span class="tag t-ok">完成</span></td><td>评级 + 数据 + 两个出口</td><td>「再来一局」之外必须有「回到主菜单」，否则放弃本局后玩家出不去</td></tr>
       <tr><td><b>图鉴</b></td><td><span class="tag t-ok">完成</span></td><td>敌人 / 武器 / 被动三页</td><td>数值直接读配置，不另抄一份</td></tr>
       <tr><td><b>背景音乐</b></td><td><span class="tag t-ok">完成</span></td><td>菜单 / 战斗 / BOSS 三首</td><td>段落式曲式，主歌副歌高潮，首尾循环</td></tr>
       <tr><td><b>音效</b></td><td><span class="tag t-ok">完成</span></td><td>全部 Web Audio 实时合成</td><td>零音频文件，零版权风险</td></tr>
@@ -466,6 +467,25 @@ footer{
     </tbody>
   </table>
   </div>
+
+  <h3>配色体系：明度对比优先</h3>
+  <p>「经验球看不清」这个问题的根因不是色系接近，是<strong>明度没拉开</strong>。原地面明度 95，经验球 78——物体比背景还暗，转成灰阶直接消失。</p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>层级</th><th>颜色</th><th>明度</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>环境 60%</td><td>地面 <code>#C9DFEF</code></td><td>82</td><td>从 95 压下来。地面占六成画面，越亮前景越难看清</td></tr>
+      <tr><td>环境 60%</td><td>天空 <code>#A9CBE4</code></td><td>—</td><td>比地面略深，拉出地平线</td></tr>
+      <tr><td>点缀 10%</td><td>经验球 <code>#FFD24A</code></td><td>84 + 黑边</td><td>金 vs 蓝是互补色，再加黑描边保轮廓</td></tr>
+      <tr><td>危险</td><td>珊瑚红 <code>#FF4D6D</code></td><td>—</td><td>BOSS 手臂与能量环，冷背景上最跳的暖色</td></tr>
+      <tr><td>玩家</td><td>暖白 <code>#FFF8EE</code></td><td>—</td><td>中性色，不与任何敌人撞</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note">
+    <b>判断「看不清」的正确方法</b>
+    先别调色相。把截图转灰阶：目标消失了 → 问题在<b>明度</b>；目标还在但分不清彼此 → 才是<b>色相</b>问题。这两种病开的药不一样。本次第一次改完把经验球改成金色（L84），灰阶下仍然消失——只比地面高 2 档，等于没差。最后靠<b>黑色描边壳</b>（BackSide + 放大 1.34）才解决，因为黑（L10）和任何明亮背景的明度差都在 65 以上，换什么背景都成立。
+  </div>
 </section>
 
 <!-- ══════════════ 数值 ══════════════ -->
@@ -516,14 +536,42 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   </div>
 
   <h2>BOSS 血量怎么来的</h2>
-  <pre>hp = EXPECTED_DPS[波次] × 目标秒数
+  <pre>hp = max(260, 玩家当前单目标 DPS × 目标秒数)
 
-第 5 波： 451 × 16 = <span class="k">7,216</span>
-第 10 波：2,387 × 28 = <span class="k">66,836</span></pre>
-  <p>这样做的好处：你改武器强度，BOSS 血量自动跟着变，不会出现「玩家变强了但 BOSS 没变」导致的一秒秒杀。</p>
+单目标 DPS = estimateDPS(single) × (1 + 暴击率 × 1.0)
+目标秒数   = 裂口巨兽 12 秒 / 千手墨神 20 秒</pre>
+  <p><strong>血量在开战那一刻现算，不是查表。</strong>谁打都是同一个时长——这是「不被秒杀、也不打不动」的唯一解。</p>
+
+  <h3>为什么不用查表</h3>
+  <p>第一版是 <code>hp = EXPECTED_DPS[波次] × 目标秒数</code>，<code>EXPECTED_DPS</code> 是「典型配装」的期望值。这个做法假设「每个玩家到第 5 波强度差不多」，实测完全不成立。四个构筑策略打同一个 7,216 血：</p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>策略</th><th>配装</th><th>TTK</th></tr></thead>
+    <tbody>
+      <tr><td>rush</td><td>3 把武器，激光满级</td><td>42.8 秒</td></tr>
+      <tr><td>random</td><td>3 把武器，等级低</td><td>56.8 秒</td></tr>
+      <tr><td>balanced</td><td>1 把弓</td><td>90 秒打不完，剩 65%</td></tr>
+      <tr><td>passive</td><td>1 把弓</td><td>90 秒打不完，剩 61%</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>同一个 BOSS，体验差两到三倍。玩家报「秒杀」是因为抽到了强配装，弱配装玩家则觉得打不动。</p>
+
+  <h3>三个实现细节</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>细节</th><th>做法</th><th>不这么做会怎样</th></tr></thead>
+    <tbody>
+      <tr><td><b>单目标口径</b></td><td><code>estimateDPS(true)</code> 不乘「清怪系数」</td><td>镰刀 2.6、地刺 4.6 的系数会把血量高估 2-4 倍。血月斩对着一只 BOSS 不会打出四倍输出</td></tr>
+      <tr><td><b>补暴击期望</b></td><td><code>× (1 + 暴击率 × 1.0)</code></td><td>原本只算基础伤害，高暴击配装的 BOSS 会被低估</td></tr>
+      <tr><td><b>目标秒数 ≠ 墙钟秒数</b></td><td>设 12/20 秒，实测墙钟 6.5-21.9 秒</td><td>玩家要躲招，有效输出只占 60-75%。按理论秒数配血会偏厚</td></tr>
+    </tbody>
+  </table>
+  </div>
+
   <div class="note bad">
-    <b>代价：EXPECTED_DPS 要手动同步</b>
-    那 10 个数字写死在代码里。改了武器伤害忘了改它，BOSS 会悄悄变脆而且不报错。项目里有 <code>docs/tools/calc_curve.py</code> 专门校验这件事，改完数值必须跑一遍。
+    <b>踩过的坑：血量下限</b>
+    第一版加了 <code>Math.max(2600, ...)</code> 防止 BOSS 变纸。结果弱配装（DPS 30）打 2,600 血要 <b>87 秒</b>。下限保护的是 BOSS 的体面，牺牲的是玩家的时间。去掉后，DPS 30 的玩家面对 360 血，同样 12 秒打完。
   </div>
 
   <h2>升级经验</h2>
@@ -636,6 +684,9 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <tr><td>丢炸弹卡脚</td><td>顿帧把整个 update 的 dt 压到 22%</td><td>手感类特效不能作用在玩家操作上</td></tr>
       <tr><td>主页音乐循环时「戛然而止」</td><td>前奏/尾奏的配器表把低音和鼓全填 0，只剩长音；低音包络又是一路指数衰减</td><td>音乐里的「薄」是降密度，不是删除脉搏。低音和踩镲是听众判断「歌还在不在」的锚点</td></tr>
       <tr><td>测出的音频低点分不清真假</td><td>用 setInterval 读 Analyzer，定时器会被浏览器节流</td><td>测音频动态要用按音频时钟回调的 ScriptProcessorNode</td></tr>
+      <tr><td>经验球看不清</td><td>地面明度 95、经验球 78，物体比背景暗，同属蓝青色系</td><td>先测灰阶再调色。只靠色相不算修好</td></tr>
+      <tr><td>BOSS 有时秒杀、有时打不动</td><td>血量用查表值，跟玩家实际配装脱节</td><td>血量要跟随玩家强度，不能跟随「期望强度」</td></tr>
+      <tr><td>四个测试智能体全部超时</td><td>测试脚本没把游戏从升级界面切回 play，整局都在暂停</td><td>测试写错了不会报错，只会给出「全都打不过」的假结论</td></tr>
       <tr><td>千手墨神的手臂全消失</td><td>动画读 <code>userData.rz</code>，新模型没写 → <code>undefined + 数字 = NaN</code></td><td>NaN 不会报错，只会让矩阵失效。新模型必须补齐动画依赖的字段</td></tr>
     </tbody>
   </table>
@@ -649,7 +700,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   <table>
     <thead><tr><th>#</th><th>问题</th><th>影响</th><th>打算怎么处理</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td><b>BOSS 血量只按公式推，没实测</b></td><td>7,216 / 66,836 这两个数是从预估 DPS 算的。实际玩家有超武，DPS 可能高出 30%</td><td>你打一局，告诉我 BOSS 打了多久。短于 10 秒就上调目标秒数</td></tr>
+      <tr><td>1</td><td><b>BOSS 血量已改为实时派生并压力测试</b></td><td>第 5 波 8 样本 6.5-16.6 秒（目标 12，偏差 1.08×）；第 10 波 4 样本 16.4-21.9 秒（目标 20，偏差 0.97×）</td><td>已解决。详见 <code>docs/TESTING.md</code>。仍需真人确认体感</td></tr>
       <tr><td>2</td><td><b>六把武器的强度差没实测</b></td><td>表里 Lv5 都在 130-180 区间，但那是理论 DPS，实战手感不同</td><td>你玩的时候留意哪把明显好用，我单独下调那一个的清怪系数</td></tr>
       <tr><td>3</td><td><b>真机帧率没测</b></td><td>无头浏览器是软件渲染，截图能看但不代表性能。第 10 波 150 只怪 + 卡通材质</td><td>你打开看右上角掉不掉帧，掉了我就降同屏上限</td></tr>
       <tr><td>4</td><td><b>Three.js 走 CDN</b></td><td>评审打开必须联网。断网或 CDN 被墙就是白屏</td><td>可以内联 three.min.js，文件从 183KB 涨到 800KB，换零外网依赖</td></tr>
