@@ -410,6 +410,48 @@ footer{
   </table>
   </div>
 
+  <h2>音频设计</h2>
+  <p>三首曲子全部 Web Audio 实时合成，零音频文件。每首都是有结构的短曲，不是一段循环。</p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>场景</th><th>BPM</th><th>小节</th><th>调性</th><th>段落结构</th></tr></thead>
+    <tbody>
+      <tr><td>菜单</td><td>82</td><td>8</td><td>Am9 · Fmaj7 · Cmaj7 · G6</td><td>前奏 1 + 主歌 2 + 副歌 2 + 主歌 1 + 副歌 1 + 尾奏 1</td></tr>
+      <tr><td>战斗</td><td>134</td><td>16</td><td>Am · F · C · G</td><td>主歌 4 + 副歌 4 + 高潮 4 + 回落 4</td></tr>
+      <tr><td>BOSS</td><td>152</td><td>16</td><td>Dm · Bb · F · C</td><td>主歌 4 + 副歌 4 + 高潮 6 + 尾奏 2</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>无缝循环的三条硬规则</h3>
+  <p>第一版菜单音乐听起来「播到一半戛然而止，然后播第二段」，根因是三条全违反了。这三条是实测出来的，不是猜的。</p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>规则</th><th>违反的后果</th><th>正确做法</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>过渡段必须保留节奏声部</b></td>
+        <td>把前奏/尾奏的低音和鼓全填 0，只剩一条长音。循环点前后 3 小节、8.8 秒没有脉搏，听感就是「音乐停了」</td>
+        <td>减配器是<b>降密度</b>，不是<b>清零</b>。任何段落至少保留低音或踩镲</td>
+      </tr>
+      <tr>
+        <td><b>长音不能从零起音</b></td>
+        <td>每小节开头有 0.3 秒真空，表现为周期性「一顿一顿」</td>
+        <td>从 40–50% 音量起，时长略超过一小节形成重叠</td>
+      </tr>
+      <tr>
+        <td><b>包络要分起音 / 保持 / 释放</b></td>
+        <td>起音后一路指数衰减 = 每个音「砰一下就没了」，音与音之间留空白</td>
+        <td>保持到 60% 时长再释放，低音才是一条连续的线</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note bad">
+    <b>测量方法本身也可能是错的</b>
+    第一版用 <code>setInterval</code> 每 50ms 读 <code>AnalyserNode</code>，测出孤立极低点，但分不清是音乐断了还是定时器被浏览器节流。改用 <code>ScriptProcessorNode</code>（按音频时钟回调，每 93ms 一块）才测到真实动态。修复后每秒 RMS 稳定在 0.019–0.034，最长低谷 0.28 秒且发生在淡入期。
+  </div>
+
   <h2>美术方向</h2>
   <div class="tw">
   <table>
@@ -592,6 +634,8 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <tr><td>尖刺兽隐形只剩阴影</td><td>给它套了 0~360° 随机 X 轴旋转，转到 180° 整个人沉到地下</td><td>「看不见」不等于「没渲染」。实例数一直是对的</td></tr>
       <tr><td>没选武器却多了武器</td><td>宝箱直接 <code>weapons.push()</code></td><td>内容获取途径必须唯一。参考游戏里宝箱只升级已有武器</td></tr>
       <tr><td>丢炸弹卡脚</td><td>顿帧把整个 update 的 dt 压到 22%</td><td>手感类特效不能作用在玩家操作上</td></tr>
+      <tr><td>主页音乐循环时「戛然而止」</td><td>前奏/尾奏的配器表把低音和鼓全填 0，只剩长音；低音包络又是一路指数衰减</td><td>音乐里的「薄」是降密度，不是删除脉搏。低音和踩镲是听众判断「歌还在不在」的锚点</td></tr>
+      <tr><td>测出的音频低点分不清真假</td><td>用 setInterval 读 Analyzer，定时器会被浏览器节流</td><td>测音频动态要用按音频时钟回调的 ScriptProcessorNode</td></tr>
       <tr><td>千手墨神的手臂全消失</td><td>动画读 <code>userData.rz</code>，新模型没写 → <code>undefined + 数字 = NaN</code></td><td>NaN 不会报错，只会让矩阵失效。新模型必须补齐动画依赖的字段</td></tr>
     </tbody>
   </table>
