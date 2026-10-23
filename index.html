@@ -173,6 +173,7 @@ body.is-title canvas#gl{
 .pickrow{display:grid; grid-template-columns:1fr 1fr; gap:10px}
 .pick{
   display:flex; gap:12px; align-items:flex-start;
+  padding: 10px 12px 13px;
   background:#fff; color:var(--ink);
   border:4px solid var(--ink); border-radius:5px;
   padding:clamp(12px,1.2vw,18px) clamp(13px,1.3vw,19px); cursor:pointer;
@@ -588,6 +589,15 @@ body.is-title canvas#gl{
 
 /* 矮屏补充：升级页与经验条 */
 @media (max-height: 520px){
+  /* 主页：矮屏下白卡别再按比例撑满，否则内容只有三行、下方空一大块 */
+  .t-body{ align-items: flex-start; flex: 0 0 auto; }
+  .t-setup{ flex: 0 0 auto; width: 100%; justify-content: flex-start; }
+  /* 标题在 390 高里会被顶边裁掉，收字号 + 缩小字距 */
+  #scr-title{ padding-top: 5px; gap: 7px; }
+  #scr-title .logo{ font-size: 24px; line-height: 1.02; }
+  .t-howto{ display: none; }
+  .pick{ padding: 7px 10px 9px; }
+
   /* 升级三选一：卡片纵向压扁，否则「重掷」按钮会被挤出屏幕 */
   #scr-level{gap:6px; padding:6px 10px}
   .lvlhead{font-size:24px; -webkit-text-stroke:4px var(--ink); text-shadow:4px 4px 0 var(--ink)}
@@ -606,6 +616,211 @@ body.is-title canvas#gl{
   .xpwrap{padding:0}
   .xpbar{height:13px; border-top-width:3px}
   .xpbar span{font-size:9px; letter-spacing:.1em}
+}
+
+/* ══════════ 主页视觉升级 ══════════
+   原来所有卡都是 5px 圆角 + skew 斜切，堆在一起像老式街机面板。
+   现在统一成 12px 圆角、双层投影、明确的卡片边界，斜切只保留在标题上。 */
+.t-setup{
+  border-radius: 14px;
+  transform: none;
+  box-shadow: 8px 8px 0 rgba(10,10,18,.62), 0 0 0 1px rgba(10,10,18,.08) inset;
+  padding: clamp(12px,1.6vh,18px) clamp(13px,1.6vw,20px);
+}
+.t-howto{
+  border-radius: 14px;
+  box-shadow: 8px 8px 0 rgba(10,10,18,.62);
+  /* 右栏是一块深色磨砂板，让两栏一眼分得开 */
+  background: linear-gradient(160deg, rgba(16,18,34,.94), rgba(10,11,22,.97));
+  border-color: rgba(255,246,233,.22);
+}
+.t-rows{gap:14px}
+.t-row{
+  padding-bottom: 11px;
+  border-bottom: 1px dashed rgba(255,246,233,.14);
+}
+.t-row:last-child{border-bottom:none; padding-bottom:0}
+
+/* 角色卡：加左侧色条，选中的卡整张变亮 */
+.pick{
+  border-radius: 11px;
+  box-shadow: 4px 4px 0 rgba(10,10,18,.55);
+  transition: transform .12s cubic-bezier(.2,1.4,.4,1), box-shadow .12s, background .12s;
+  position: relative; overflow: hidden;
+}
+.pick::before{
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+  background: var(--pcol, #7b2ff7);
+}
+.pick.on{ background: #fff; box-shadow: 4px 4px 0 var(--mag), 0 0 0 3px var(--ink) }
+.pick:hover{ transform: translate(-1px,-2px); box-shadow: 6px 6px 0 rgba(10,10,18,.55) }
+
+/* 密度：从四个按钮改成一条分段控件，选中项填满深色 */
+.rate{
+  display: flex; gap: 0; background: #e8e4dc; border: 3px solid var(--ink);
+  border-radius: 9px; padding: 3px; overflow: hidden;
+}
+.rate button{
+  flex: 1 1 0; border: none; background: transparent; border-radius: 6px;
+  padding: 9px 4px; font-family: var(--ui); font-weight: 800; font-size: 13px;
+  color: #5a5a68; cursor: pointer; transition: background .12s, color .12s;
+  letter-spacing: .04em;
+}
+.rate button:hover{ background: #d8d3c8; color: var(--ink) }
+.rate button.on{
+  background: var(--ink); color: var(--yel);
+  box-shadow: 2px 2px 0 rgba(10,10,18,.35);
+}
+
+/* 底部动作区 */
+.t-actions{
+  display: flex; gap: 10px; align-items: stretch;
+  width: 100%; max-width: min(1160px, 95vw);
+  margin-top: clamp(8px, 1.4vh, 14px);
+}
+.startbig{
+  flex: 1 1 auto;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; line-height: 1.1;
+  border-radius: 12px !important;
+}
+.startbig .sbt{ font-size: clamp(20px, 2.2vw, 30px); letter-spacing: .16em }
+.startbig .sbs{
+  font-family: var(--ui); font-weight: 700; font-size: 10px;
+  letter-spacing: .14em; opacity: .72;
+}
+.codexbtn{
+  flex: 0 0 auto; min-width: 122px;
+  border-radius: 12px !important;
+  background: #fff; color: var(--ink);
+  font-size: clamp(14px, 1.2vw, 17px); letter-spacing: .14em;
+  border: 4px solid var(--ink); cursor: pointer;
+  box-shadow: 6px 6px 0 rgba(10,10,18,.6);
+  transition: transform .1s, box-shadow .1s;
+}
+.codexbtn:hover{ background: var(--yel) }
+.codexbtn:active{ transform: translate(3px,3px); box-shadow: 3px 3px 0 rgba(10,10,18,.6) }
+
+/* ══════════ 图鉴 ══════════ */
+#scr-codex{
+  background: rgba(8,10,24,.9);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  z-index: 34;
+}
+.codex-panel{
+  width: min(1120px, 96vw);
+  max-height: 94vh;
+  display: flex; flex-direction: column; gap: 11px;
+  background: var(--paper);
+  border: 5px solid var(--ink);
+  border-radius: 16px;
+  padding: clamp(13px,1.8vh,20px) clamp(14px,1.8vw,22px);
+  box-shadow: 12px 12px 0 rgba(10,10,18,.62);
+  color: var(--ink);
+}
+.codex-head{
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+.codex-title{ flex: 1 1 auto; min-width: 0 }
+.codex-title h2{
+  font-family: var(--disp); font-size: clamp(22px,2.4vw,30px); letter-spacing: .22em;
+  line-height: 1; margin: 0;
+}
+.codex-title s{
+  display: block; text-decoration: none; margin-top: 5px;
+  font-family: var(--ui); font-size: 11px; letter-spacing: .08em; color: #6b6b7a;
+}
+.codex-tabs{
+  display: flex; gap: 0; background: #e8e4dc; border: 3px solid var(--ink);
+  border-radius: 9px; padding: 3px;
+}
+.codex-tabs button{
+  border: none; background: transparent; border-radius: 6px; cursor: pointer;
+  padding: 8px 16px; font-family: var(--ui); font-weight: 800; font-size: 13px;
+  letter-spacing: .1em; color: #5a5a68; transition: background .12s, color .12s;
+}
+.codex-tabs button.on{ background: var(--ink); color: var(--yel) }
+.codex-tabs button:hover:not(.on){ background: #d8d3c8; color: var(--ink) }
+
+.codex-body{
+  flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 12px; padding: 3px 5px 3px 2px;
+}
+.codex-body::-webkit-scrollbar{ width: 8px }
+.codex-body::-webkit-scrollbar-thumb{ background: #b9b4a8; border-radius: 4px }
+
+.cx-card{
+  background: #fff; border: 3px solid var(--ink); border-radius: 11px;
+  padding: 12px 13px; box-shadow: 4px 4px 0 rgba(10,10,18,.5);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.cx-head{ display: flex; align-items: center; gap: 10px }
+.cx-blob{
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 3px solid var(--ink); flex: 0 0 46px;
+  position: relative; overflow: hidden;
+  box-shadow: 2px 2px 0 rgba(10,10,18,.4);
+}
+/* 用三个色块拼一个抽象剪影，对应目标的三主色 */
+.cx-blob i{ position: absolute; display: block; border-radius: 50% }
+.cx-name{
+  font-family: var(--disp); font-size: 17px; letter-spacing: .06em; line-height: 1.1;
+}
+.cx-tag{
+  display: inline-block; margin-top: 3px; padding: 1px 7px;
+  background: var(--ink); color: var(--yel); border-radius: 4px;
+  font-family: var(--ui); font-size: 10px; font-weight: 800; letter-spacing: .08em;
+}
+.cx-look{
+  font-size: 12px; line-height: 1.55; color: #3d3d4a;
+}
+.cx-look b{ color: var(--ink) }
+.cx-stats{
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 10px;
+  border-top: 2px dotted #d8d3c8; padding-top: 8px;
+}
+.cx-stat{ display: flex; justify-content: space-between; font-size: 11px; color: #5a5a68 }
+.cx-stat b{ color: var(--ink); font-family: var(--disp); font-size: 12px }
+.cx-lv{
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px;
+}
+.cx-lv span{
+  font-size: 10px; padding: 1px 6px; border-radius: 3px;
+  background: #eef2f7; color: #47506b; border: 1px solid #d6dce8;
+}
+.cx-lv span.hot{ background: var(--ink); color: var(--yel); border-color: var(--ink) }
+.cx-note{
+  font-size: 11px; line-height: 1.5; color: #7b2ff7; font-weight: 700;
+}
+.cx-evo{
+  font-size: 11px; color: #0a8f55; font-weight: 800;
+  border-top: 2px dotted #d8d3c8; padding-top: 7px;
+}
+.codex-foot{
+  flex: 0 0 auto; font-size: 10px; color: #7a7a8a; letter-spacing: .06em;
+  text-align: center;
+}
+
+/* 矮屏（手机横屏）：图鉴压成两列，卡片内容精简 */
+@media (max-height: 520px){
+  .codex-panel{ padding: 8px 10px; gap: 7px; border-width: 4px; border-radius: 11px }
+  .codex-title h2{ font-size: 18px; letter-spacing: .16em }
+  .codex-title s{ display: none }
+  .codex-tabs button{ padding: 5px 11px; font-size: 11px }
+  .codex-body{ grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px }
+  .cx-card{ padding: 8px 9px; gap: 5px; border-width: 2px }
+  .cx-blob{ width: 32px; height: 32px; flex-basis: 32px; border-width: 2px }
+  .cx-name{ font-size: 14px }
+  .cx-look{ font-size: 10.5px; line-height: 1.4 }
+  .cx-stats{ padding-top: 5px; gap: 2px 8px }
+  .cx-stat{ font-size: 10px }
+  .codex-foot{ display: none }
+  .t-actions{ margin-top: 6px }
+  .codexbtn{ min-width: 86px; font-size: 12px }
+  .startbig .sbs{ display: none }
 }
 </style>
 </head>
@@ -696,7 +911,13 @@ body.is-title canvas#gl{
     </aside>
   </div>
 
-  <button class="btn startbig" id="startbtn">开 始 对 战</button>
+  <div class="t-actions">
+    <button class="btn startbig" id="startbtn">
+      <span class="sbt">开 始 对 战</span>
+      <span class="sbs">十波 · 两个 BOSS · 全自动射击</span>
+    </button>
+    <button class="btn codexbtn" id="codexbtn">图 鉴</button>
+  </div>
   <div class="hint">点击任意处开启背景音乐 · MADE WITH WORKBUDDY</div>
 </div>
 
@@ -738,6 +959,26 @@ body.is-title canvas#gl{
       <button class="btn sm" id="resume">继 续</button>
       <button class="btn sm alt" id="quitbtn">放弃本局</button>
     </div>
+  </div>
+</div>
+
+<!-- ══ 图鉴 ══ -->
+<div id="scr-codex" class="screen hide">
+  <div class="codex-panel">
+    <div class="codex-head">
+      <div class="codex-title">
+        <h2>图 鉴</h2>
+        <s>敌人 · 武器 · 被动，全部数值取自游戏内配置</s>
+      </div>
+      <div class="codex-tabs" id="codexTabs">
+        <button data-tab="monster" class="on">敌 人</button>
+        <button data-tab="weapon">武 器</button>
+        <button data-tab="passive">被 动</button>
+      </div>
+      <button class="btn sm alt" id="codexclose">关 闭</button>
+    </div>
+    <div class="codex-body" id="codexBody"></div>
+    <div class="codex-foot">颜色块是该目标在游戏里的实际配色，照着颜色就能认出它</div>
   </div>
 </div>
 
@@ -3962,6 +4203,188 @@ $('volsfx').oninput = function(){
   AUDIO.apply();
 };
 $('volsfx').onchange = function(){ SFX.shoot(); };
+/* ═══════════════ 图鉴 ═══════════════
+   三种视角：敌人 / 武器 / 被动。
+   数值全部现读 ETYPES / WDEF / PDEF / EVO，不抄一份常量 ——
+   否则改了平衡，图鉴还显示旧数字，这种「两处各写一遍」的坑踩过太多次。
+   只有「长什么样」「怎么打」这种描述性文字是手写的。 */
+
+var CODEX_LOOK = {
+  blob:    {tag:'近战 · 直冲', cols:['#7b2ff7','#ffffff','#ff2e88'],
+            look:'紫色小团，正面两只白眼仁，身后三条洋红触须',
+            note:'最基础的小怪，直线冲脸，用来堆密度'},
+  spiker:  {tag:'近战 · 高速', cols:['#00e5ff','#ffe600','#ff2e88'],
+            look:'青色八面体，插着五根黄刺，正面一道黑色横眼',
+            note:'速度最快，接触伤害高，优先清掉'},
+  chunk:   {tag:'肉盾 · 慢速', cols:['#ffe600','#7b2ff7','#ff3b30'],
+            look:'黄色大圆球，正面两颗红眼带黑瞳，下方黑裂口和三颗白牙，底部两颗蓝紫小球',
+            note:'血厚体积大，挡走位，别被它堵进角落'},
+  thrower: {tag:'远程 · 保持距离', cols:['#ff3b30','#ffe600','#ff2e88'],
+            look:'红色柱状身体，洋红尖帽，右手举一颗黄球',
+            note:'不贴脸，站在外围扔墨弹，绕圈就能躲'}
+};
+
+var CODEX_BOSS = [
+  { name:'裂口巨兽', wave:5, cols:['#3d1a5e','#c0164e','#ffe600'],
+    tag:'第 5 波 · 贴地',
+    look:'紫色圆饼，正面开一张红色大嘴，嘴沿一圈白牙，两侧一对黄眼',
+    moves:'蓄力冲锋（前摇会压扁身体）· 震地十八向冲击弹 · 接触撕咬',
+    note:'近身压制型，别站它正前方，绕侧后打' },
+  { name:'千手墨神', wave:10, cols:['#3b2a72','#00e5ff','#ffe600'],
+    tag:'第 10 波 · 悬浮',
+    look:'紫色形体，八条青色手臂放射平铺，末端黄色爪，正面一只竖眼',
+    moves:'十六向环形弹幕 · 三连追踪弹 · 瞬移重组',
+    note:'远程封锁型，靠弹幕缝隙走，别追它' }
+];
+
+var CODEX_WROLE = {
+  bow:      {role:'远程 · 散射', note:'扇形多发，人越多越强，最稳的起手'},
+  laser:    {role:'远程 · 穿透', note:'一条线打到底，怪物排队时伤害翻倍'},
+  scythe:   {role:'近身 · 环绕', note:'贴脸清场，不用瞄准，但必须敢往怪堆里站'},
+  bomb:     {role:'投掷 · 范围', note:'抛物线落点爆炸，成堆的怪一次清'},
+  shuriken: {role:'回旋 · 追踪', note:'会绕回来咬人，单点输出高'},
+  spike:    {role:'地面 · 陷阱', note:'铺在身后，边跑边铺，专门对付追兵'}
+};
+
+function codexBlob(cols){
+  return '<div class="cx-blob" style="background:' + cols[0] + '">' +
+    '<i style="width:42%;height:42%;left:10%;top:14%;background:' + cols[1] + '"></i>' +
+    '<i style="width:26%;height:26%;right:8%;bottom:12%;background:' + cols[2] + '"></i>' +
+  '</div>';
+}
+
+function codexCard(head, body){
+  return '<div class="cx-card">' + head + body + '</div>';
+}
+
+function buildCodexMonster(){
+  var html = '';
+  EKEYS.forEach(function(k){
+    var d = ETYPES[k], m = CODEX_LOOK[k] || {tag:'', cols:['#999','#ccc','#eee'], look:'', note:''};
+    var head =
+      '<div class="cx-head">' + codexBlob(m.cols) +
+        '<div><div class="cx-name">' + d.name + '</div>' +
+        '<span class="cx-tag">' + m.tag + '</span></div>' +
+      '</div>';
+    var body = '<div class="cx-look">' + m.look + '</div>' +
+      '<div class="cx-stats">' +
+        '<div class="cx-stat"><span>基础血量</span><b>' + d.hp + '</b></div>' +
+        '<div class="cx-stat"><span>移动速度</span><b>' + d.spd + '</b></div>' +
+        '<div class="cx-stat"><span>接触伤害</span><b>' + d.dmg + '</b></div>' +
+        '<div class="cx-stat"><span>经验值</span><b>' + d.xp + '</b></div>' +
+      '</div>' +
+      '<div class="cx-note">' + m.note + '</div>';
+    html += codexCard(head, body);
+  });
+
+  CODEX_BOSS.forEach(function(b){
+    var head =
+      '<div class="cx-head">' + codexBlob(b.cols) +
+        '<div><div class="cx-name">' + b.name + '</div>' +
+        '<span class="cx-tag">' + b.tag + '</span></div>' +
+      '</div>';
+    var hp = Math.round(EXPECTED_DPS[b.wave - 1] * (b.wave >= 10 ? 28 : 16));
+    var body = '<div class="cx-look">' + b.look + '</div>' +
+      '<div class="cx-stats">' +
+        '<div class="cx-stat"><span>血量</span><b>' + hp.toLocaleString() + '</b></div>' +
+        '<div class="cx-stat"><span>目标耗时</span><b>' + (b.wave >= 10 ? 28 : 16) + ' 秒</b></div>' +
+      '</div>' +
+      '<div class="cx-look" style="font-size:11.5px"><b>招式：</b>' + b.moves + '</div>' +
+      '<div class="cx-note">' + b.note + '</div>';
+    html += codexCard(head, body);
+  });
+  return html;
+}
+
+function buildCodexWeapon(){
+  var html = '';
+  WKEYS.forEach(function(id){
+    var d = WDEF[id], r = CODEX_WROLE[id] || {role:'', note:''};
+    var ev = EVO[id];
+    var head =
+      '<div class="cx-head">' + codexBlob([d.col, '#ffffff', '#0a0a12']) +
+        '<div><div class="cx-name">' + d.name + '</div>' +
+        '<span class="cx-tag">' + r.role + '</span></div>' +
+      '</div>';
+    var lvs = '';
+    d.lv.forEach(function(txt, idx){
+      lvs += '<span class="' + (idx === d.max - 1 ? 'hot' : '') + '">Lv' + (idx + 1) + ' ' + txt + '</span>';
+    });
+    var body = '<div class="cx-look">' + r.note + '</div>' +
+      '<div class="cx-lv">' + lvs + '</div>' +
+      '<div class="cx-stats">' +
+        '<div class="cx-stat"><span>单发伤害</span><b>' + d.dmg[0] + ' → ' + d.dmg[d.max - 1] + '</b></div>' +
+        '<div class="cx-stat"><span>冷却</span><b>' + d.cd[0] + ' → ' + d.cd[d.max - 1] + ' 秒</b></div>' +
+      '</div>' +
+      (ev ? '<div class="cx-evo">超武：' + ev.name + '　' + ev.gain + '</div>' : '');
+    html += codexCard(head, body);
+  });
+  return html;
+}
+
+function buildCodexPassive(){
+  var html = '';
+  PKEYS.forEach(function(id){
+    var d = PDEF[id];
+    var head =
+      '<div class="cx-head">' + codexBlob([d.col, '#ffffff', '#0a0a12']) +
+        '<div><div class="cx-name">' + d.name + '</div>' +
+        '<span class="cx-tag">被动 · 最多 ' + d.max + ' 级</span></div>' +
+      '</div>';
+    var body = '<div class="cx-look">' + d.txt(1) + '（每级）</div>' +
+      '<div class="cx-stats">' +
+        '<div class="cx-stat"><span>Lv1</span><b>' + d.txt(1) + '</b></div>' +
+        '<div class="cx-stat"><span>Lv' + d.max + '</span><b>' + d.txt(d.max) + '</b></div>' +
+      '</div>';
+    html += codexCard(head, body);
+  });
+  /* 超武单独成一组，玩家最需要知道「哪条流派对应哪个超武」 */
+  WKEYS.forEach(function(id){
+    var ev = EVO[id];
+    if(!ev) return;
+    var w = WDEF[id];
+    html += codexCard(
+      '<div class="cx-head">' + codexBlob([ev.col, '#ffffff', '#0a0a12']) +
+        '<div><div class="cx-name">' + ev.name + '</div>' +
+        '<span class="cx-tag">超武 · 整局只能选一个</span></div>' +
+      '</div>',
+      '<div class="cx-look">' + ev.desc + '</div>' +
+      '<div class="cx-evo">前置：' + w.name + ' 满级 + ' + PDEF[ev.req].name + ' 3 级</div>' +
+      '<div class="cx-note">' + ev.gain + '</div>'
+    );
+  });
+  return html;
+}
+
+var codexTab = 'monster';
+function renderCodex(){
+  var box = $('codexBody');
+  if(!box) return;
+  if(codexTab === 'weapon') box.innerHTML = buildCodexWeapon();
+  else if(codexTab === 'passive') box.innerHTML = buildCodexPassive();
+  else box.innerHTML = buildCodexMonster();
+}
+function openCodex(){
+  renderCodex();
+  $('scr-codex').classList.remove('hide');
+  SFX.chest();
+}
+function closeCodex(){
+  $('scr-codex').classList.add('hide');
+}
+if($('codexbtn')) $('codexbtn').onclick = openCodex;
+if($('codexclose')) $('codexclose').onclick = closeCodex;
+if($('codexTabs')){
+  $('codexTabs').onclick = function(e){
+    var b = e.target.closest('button');
+    if(!b) return;
+    codexTab = b.dataset.tab;
+    Array.prototype.forEach.call(this.children, function(x){ x.classList.toggle('on', x === b); });
+    renderCodex();
+    SFX.hit();
+  };
+}
+
 $('startbtn').onclick = startGame;
 $('bagbtn').onclick = function(){ toggleBag(); };
 $('bagclose').onclick = function(){ toggleBag(); };
