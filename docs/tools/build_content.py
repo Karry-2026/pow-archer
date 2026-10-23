@@ -13,7 +13,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-OUT = "C:/Users/karry/WorkBuddy/2026-10-23-00-53-14/pow-archer/docs/POW_ARCHER_内容总表.xlsx"
+OUT = "C:/Users/karry/WorkBuddy/2026-10-23-00-53-14/pow-archer/docs/爆裂弓箭手_内容总表.xlsx"
 
 
 def xl_color(css_hex: str) -> str:

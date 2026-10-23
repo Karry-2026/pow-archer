@@ -15,7 +15,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.formatting.rule import CellIsRule
 from openpyxl.chart import LineChart, Reference
 
-OUT = "C:/Users/karry/WorkBuddy/2026-10-23-00-53-14/pow-archer/docs/POW_ARCHER_数值策划表.xlsx"
+OUT = "C:/Users/karry/WorkBuddy/2026-10-23-00-53-14/pow-archer/docs/爆裂弓箭手_数值分析表.xlsx"
 
 
 def xl_color(css_hex: str) -> str:
