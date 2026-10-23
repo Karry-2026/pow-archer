@@ -968,6 +968,78 @@ function startGame(){
 
 ---
 
+## 12:30 遮罩按钮全部失效 —— 我自己替换代码替换错了
+
+用户反馈：横屏遮罩的两个按钮，「自动横屏」和「就这样玩」都点不进去。
+
+### 根因：不是浏览器兼容，是我上一步的字符串替换打错了位置
+
+上一节（03:15）的补丁里有这么一行：
+
+```python
+old_boot = "checkOrient();"
+s = s.replace(old_boot, "bindOrientUI();\ncheckOrient();", 1)
+```
+
+意图是把启动区的 `checkOrient();` 换成「先绑定按钮再检查方向」。但 `checkOrient();` 在这份文件里出现了两次，`replace(..., 1)` 只替换**第一个**匹配。第一个匹配不在启动区，而在 `bindOrientUI` 函数体内部：
+
+```js
+if(rs) rs.onclick = function(){ ORIENT.userSkip = true; bindOrientUI();   // ← 被插进来的
+checkOrient(); };
+```
+
+后果是两个：
+
+1. **启动时 `bindOrientUI()` 从来没被执行过**，所以 `rotbtn.onclick` 和 `rotskip.onclick` 始终是 `null`。点击没有任何反应，表现就是「点不进去」。
+2. 就算执行了，`rotskip` 的 onclick 也会变成递归调用自己，逻辑同样错。
+
+### 教训
+
+字符串替换必须锚定**唯一**上下文，不能拿一个高频出现的短语句当锚点。替换完要把上下文打印出来核对，不能只看「applied N」就过。
+
+这一轮所有替换都改成了「断言锚点唯一 + 打印替换后上下文」的写法，并且把这条写进了 `tests/orient-buttons.test.mjs` 的静态检查里：**bindOrientUI 内不许出现自我递归**。
+
+### 三层兜底，让这个层不可能再卡住人
+
+光把绑定修好还不够，这个遮罩已经连续出问题两次。现在做成三层，任意一层活着就能进去：
+
+| 层 | 做法 |
+|---|---|
+| 一 | JS 绑定 `onclick`（正常路径） |
+| 二 | HTML 内联 `onclick="window.__POW_LOCK&&window.__POW_LOCK()"`，不依赖那段 JS 有没有执行到 |
+| 三 | 整个遮罩区域可点，点屏幕任意位置都等于「就这样玩」 |
+| 四 | **5 秒后自动放行**，即使以上全部失效也不会永久卡住 |
+
+第四层是这次的关键：把「必须点中按钮」变成「什么都不做也会自己走开」。计时器在遮罩撤下时清掉，不会残留。
+
+标题上直接写明「5 秒后自动进入」，玩家不会因为怕卡住而不敢等。
+
+### 顺带加的排查工具
+
+地址后面加 `?debug` 打开时，页面会在顶部用红条显示 JS 报错（文件、行号、列号）。正常访问不受影响。这是为了下次出问题时，手机上一截图就能定位，不用来回猜。
+
+### 验证：12 条用例
+
+`tests/orient-buttons.test.mjs` 从 `index.html` 抓真实的 `bindOrientUI` 源码，注入假的 `document` / `window` 执行：
+
+| 用例 | 结果 |
+|---|---|
+| 自动横屏按钮绑上了 onclick | PASS |
+| 就这样玩按钮绑上了 onclick | PASS |
+| 遮罩本身绑上了 onclick | PASS |
+| `window.__POW_LOCK` / `__POW_SKIP` 已挂出 | PASS |
+| 点自动横屏 → 触发锁屏 | PASS |
+| 点就这样玩 → 触发跳过 | PASS |
+| 点遮罩空白处 → 也能跳过 | PASS |
+| 点遮罩内按钮 → 不重复触发 | PASS |
+| 启动区调用了 bindOrientUI（静态检查） | PASS |
+| 按钮有内联 onclick 兜底（静态检查） | PASS |
+| bindOrientUI 内没有自我递归（静态检查） | PASS |
+
+12 通过 0 失败。
+
+---
+
 ## 尚未验证
 
 诚实记录，这几项没测过：
