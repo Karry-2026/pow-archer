@@ -212,3 +212,31 @@ python docs/tools/calc_curve.py --write  # 校验不过时把建议值写回 ind
 - `WDEF` 任何数值 → `calc_curve.py` + `ult.test.mjs` + 木桩 DPS 实测
 - 超武 `ULT` 表（周期/时长/伤害倍率） → `ult.test.mjs` + boss-ttk
 - 渲染池（`instPool` 容量、几何） → 布局测试 + 看控制台 JS 错误
+
+## 十、v0.14 新增：开始界面的几何守卫
+
+界面重做成「斜切两半」之后，避让切线靠的是算出来的内边距，不是排出来的空白。
+字号、行高、断点任何一处改动，都可能让某个控件重新压到斜线上 —— 这种问题
+截图放大到 200% 才看得出来，所以直接拿几何算。
+
+```bash
+node tests/title.test.mjs     # 需要 8921 静态服务 + 9971 调试端口
+```
+
+6 个尺寸 × 4 条断言：
+
+| 断言 | 判据 |
+|---|---|
+| 右列控件避开斜切线 | `rect.left ≥ 52% + ((y-H/2)/(H/2))·11.5vh`，用控件底边算（切线最低处） |
+| 标题页不溢出 | `scrollHeight ≤ clientHeight` |
+| 关键控件在视口内 | logo / 射手卡 / 密度 / 开始 / 静音 |
+| 选中 + 开始链路 | 点第二张卡 → 点第四档 → 点开始 → `mode==='play'` 且标题页**计算样式**为 none |
+
+最后一条特意用 `getComputedStyle(...).display`，不是看 class —— 因为踩过
+`#scr-title{display:block}` 压过 `.screen.hide{display:none}` 的坑，
+class 加上了但元素还挂在屏幕上。
+
+### 改了这些就该再跑一次
+
+- `.tt-*` 任何尺寸、`#scr-title` 的 padding、两个 `@media` 断点
+- 射手卡 / 密度按钮的文案长度（换行会改变 `rect.bottom`，进而改变避让量）
