@@ -19,7 +19,7 @@ import fs from 'fs';
 
 const PORT = 9961;
 const PAGE = 'http://127.0.0.1:8915/index.html';
-const CAPTURE_SEC = 26;      // 菜单一段 8 小节 ≈ 23.4 秒，覆盖到循环点
+const CAPTURE_SEC = 52;      // 菜单 16 小节 ≈ 46.8 秒（v0.12 加长），留 5 秒余量盖住循环点
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -156,9 +156,9 @@ const res = await ev(`(function(){
                min: +Math.min.apply(null, seg2.map(function(x){ return x.rms; })).toFixed(4)});
   }
 
-  /* 循环点：第 8 小节结束处（82 BPM，1 小节 = 2.927 秒） */
+  /* 循环点：第 16 小节结束处（82 BPM，1 小节 = 2.927 秒） */
   var bar = (60 / 82) * 4;
-  var loopAt = +(bar * 8).toFixed(2);
+  var loopAt = +(bar * 16).toFixed(2);
   var nearLoop = bins.filter(function(b){ return Math.abs(b.t - loopAt) < 1.2; });
 
   return {
