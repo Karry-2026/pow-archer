@@ -1,31 +1,31 @@
 {
  "info": {
   "kind": "maw",
-  "hp": 500,
+  "hp": 425,
   "dyn": 25,
   "plan": 32,
   "phase2": false,
   "invuln": 0,
-  "dps": 20
+  "dps": 17
  },
  "ph2": {
   "phase2": true,
-  "invuln": 4.5,
+  "invuln": 4.4,
   "shield": true,
   "minions": 6
  },
  "dmgTest": {
-  "before": 299,
-  "after": 299
+  "before": 254,
+  "after": 254
  },
  "afterInv": {
-  "invuln": -0.05,
+  "invuln": -0.02,
   "shield": false
  },
  "ph3": {
   "phase3": true,
   "rage": true,
-  "invuln": 2.38
+  "invuln": 2.5
  },
  "errs": []
 }

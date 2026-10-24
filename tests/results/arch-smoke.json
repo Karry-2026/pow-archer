@@ -48,9 +48,9 @@
  },
  "dist": {
   "arch": 11,
-  "general": 16,
-  "wup": 19,
-  "wnew": 14,
+  "general": 14,
+  "wup": 22,
+  "wnew": 13,
   "other": 0
  },
  "evoTest": [

@@ -337,7 +337,7 @@ footer{
   </div>
   <div class="note">
     <b>③ BOSS 血量不是写死的</b>
-    它是「这一波玩家的预估 DPS × 目标秒数」算出来的。所以你变强了，BOSS 也会变厚，但打它的时间基本恒定（16 秒 / 28 秒）。这样不会出现「后期 BOSS 一秒死」。
+    它是「开战 3.5 秒后量到的真实 DPS × 目标有效秒数」算出来的。所以你变强了，BOSS 也会变厚，但打它的时间基本恒定（32 秒 / 45 秒，含 7 秒无敌窗口）。这样不会出现「后期 BOSS 一秒死」。
   </div>
 </section>
 
@@ -349,7 +349,7 @@ footer{
     <tbody>
       <tr><th style="width:130px">是什么</th><td>2.5D 俯视角割草动作游戏，美漫/漫画风格，单文件网页应用</td></tr>
       <tr><th>给谁玩</th><td>喜欢《吸血鬼幸存者》《弓箭手大作战》这类「走位 + 构筑」的玩家；也作为 1024 程序员节参赛作品</td></tr>
-      <tr><th>单局时长</th><td>6-8 分钟（10 波，每波约 34 秒，两个 BOSS 各 16/28 秒）</td></tr>
+      <tr><th>单局时长</th><td>6-8 分钟（10 波，每波约 34 秒，两个 BOSS 各 32/45 秒）</td></tr>
       <tr><th>核心体验</th><td>不用瞄准的爽快感 + 每局不同的构筑决策 + 美漫式的视觉冲击</td></tr>
       <tr><th>不做什么</th><td>不做多人在线、不做数值养成、不做需要联网的排行榜</td></tr>
     </tbody>
@@ -381,7 +381,7 @@ footer{
       <tr><td><b>升级三选一</b></td><td><span class="tag t-ok">完成</span></td><td>武器升级 / 新武器 / 被动 / 超武 / 治疗</td><td>卡池永不为空：满级武器可以无限叠「极限突破」</td></tr>
       <tr><td><b>超武进化</b></td><td><span class="tag t-ok">完成</span></td><td>6 把武器各 1 个进化形态</td><td>整局只能选一个，选完锁定，逼迫玩家确定流派</td></tr>
       <tr><td><b>流派精通</b></td><td><span class="tag t-ok">v0.10</span></td><td>3 条线（贴身 / 投掷 / 射击）各 1 张精通卡</td><td>精通只加成自己那条线的 2 把武器 —— 混着点会摊薄，这就是取舍的来源</td></tr>
-      <tr><td><b>超武必杀</b></td><td><span class="tag t-ok">v0.10</span></td><td>蓄力环 + 空格释放，每个超武一种形态变化</td><td>让进化不只是「数值变大」，多一个可以等、可以放的节奏点</td></tr>
+      <tr><td><b>超武必杀</b></td><td><span class="tag t-ok">v0.11</span></td><td>蓄力环 + 空格释放；天降落箭 / 光柱 / 聚怪斩 / 空袭 / 超旋 / 地刺环</td><td>全屏色染 + 超武名大字 + 镜头推镜，让「放必杀」有明确反馈</td></tr>
       <tr><td><b>震屏</b></td><td><span class="tag t-ok">v0.10</span></td><td>trauma 累加 + 平方映射</td><td>连炸要合成一次长震；原来用 max 会让 4 颗炸弹抽 4 下</td></tr>
       <tr><td><b>宝箱</b></td><td><span class="tag t-ok">完成</span></td><td>升级已有武器 / 加被动</td><td><b>不给新武器</b>。武器是构筑决策，必须玩家自己选</td></tr>
       <tr><td><b>背包</b></td><td><span class="tag t-ok">完成</span></td><td>4 武器槽 + 6 被动槽，可弃用</td><td>槽满时必须弃一把才能换流派，这是取舍点</td></tr>
@@ -406,8 +406,8 @@ footer{
     <thead><tr><th>类别</th><th>数量</th><th>明细</th></tr></thead>
     <tbody>
       <tr><td>武器</td><td>6</td><td>爆裂弓 · 穿透激光 · 环绕镰 · 抛掷炸弹 · 回旋镖 · 地刺</td></tr>
-      <tr><td>被动</td><td>6</td><td>攻击强化 · 攻速狂热 · 疾风之靴 · 铁壁之心 · 磁力场 · 致命一击</td></tr>
-      <tr><td>超武</td><td>6</td><td>箭雨 · 湮灭射线 · 血月斩 · 陨石雨 · 无限回旋 · 荆棘领域</td></tr>
+      <tr><td>被动</td><td>6</td><td>贴身精通 · 投掷精通 · 射击精通 · 疾风之靴 · 铁壁之心 · 磁力场</td></tr>
+      <tr><td>超武</td><td>6</td><td>箭雨 · 湮灭射线 · 血月斩 · 陨石雨 · 无限回旋 · 荆棘领域（各带一个蓄力必杀）</td></tr>
       <tr><td>小怪</td><td>4</td><td>墨渍虫 · 尖刺兽 · 肥球 · 投掷手</td></tr>
       <tr><td>BOSS</td><td>2</td><td>裂口巨兽（第 5 波）· 千手墨神（第 10 波）</td></tr>
       <tr><td>波次</td><td>10</td><td>每波约 34 秒，BOSS 波不计时</td></tr>
@@ -502,6 +502,7 @@ footer{
       <tr><td>点缀 10%</td><td>经验球 <code>#FFD24A</code></td><td>84 + 黑边</td><td>金 vs 蓝是互补色，再加黑描边保轮廓</td></tr>
       <tr><td>危险</td><td>珊瑚红 <code>#FF4D6D</code></td><td>—</td><td>BOSS 手臂与能量环，冷背景上最跳的暖色</td></tr>
       <tr><td>玩家</td><td>暖白 <code>#FFF8EE</code></td><td>—</td><td>中性色，不与任何敌人撞</td></tr>
+      <tr><td>玩家弹</td><td>青白 / 亮橙 <code>#9FF6FF</code> <code>#FF8A1F</code></td><td>—</td><td>箭用青白、飞镖用亮橙，和敌方洋红彻底分开</td></tr>
     </tbody>
   </table>
   </div>

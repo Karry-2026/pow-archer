@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """从 index.html 反算 DPS 曲线，校验 EXPECTED_DPS 与武器参数是否自洽。
-改完武器/被动参数后跑一次：python docs/tools/calc_curve.py"""
-import re, sys, json
+改完武器/被动参数后跑一次：python docs/tools/calc_curve.py
+可选：python docs/tools/calc_curve.py --write  把建议值写回 index.html
+"""
+import re, sys
 
 HTML = "C:/Users/karry/WorkBuddy/2026-10-23-00-53-14/pow-archer/index.html"
 src = open(HTML, encoding="utf-8").read()
@@ -12,9 +14,9 @@ def grab_array(block, key):
     return [float(x) for x in m.group(1).split(",")] if m else None
 
 
-def grab_scalar(block, key):
+def grab_scalar(block, key, default=None):
     m = re.search(re.escape(key) + r":([0-9.]+)", block)
-    return float(m.group(1)) if m else None
+    return float(m.group(1)) if m else default
 
 
 # ── 提取 WDEF ──
@@ -29,77 +31,81 @@ for wid in ("bow", "laser", "scythe", "bomb", "shuriken", "spike"):
     if j < 0:
         j = len(wdef_src)
     block = wdef_src[i:j]
+    arch = re.search(r"arch:'(\w+)'", block)
     WEAPONS[wid] = {
         "dmg": grab_array(block, "dmg"),
         "cd": grab_array(block, "cd"),
         "cnt": grab_array(block, "cnt"),
-        "coef": grab_scalar(block, "coef"),
+        "coef": grab_scalar(block, "coef", 1.0),
+        "sHit": grab_scalar(block, "sHit", 1.0),
+        "hitMul": grab_scalar(block, "hitMul", 1.0),
+        "arch": arch.group(1) if arch else "shot",
     }
 
 # ── 提取乘区系数 ──
-def stat_of(key, default):
-    m = re.search(r"hero\.stat\." + key + r"\s*=\s*([^;]+);", src)
-    if not m:
-        return default
-    expr = m.group(1)
-    m2 = re.search(r"\*([0-9.]+)", expr)
-    return float(m2.group(1)) if m2 else default
-
-ATK_PER = stat_of("atk", 0.14)
-AS_PER = stat_of("as", 0.12)
-CRIT_PER = stat_of("crit", 0.07)
-CRIT_BASE = 0.06
+ARCH_DMG = grab_scalar(src, "ARCH_DMG", 0.20)
+SET_BONUS = grab_scalar(src, "SET_BONUS", 1.30)
+CRIT_BASE = grab_scalar(src, "crit:0.06", 0.06)
+m = re.search(r"hero\.stat\.crit\s*=\s*[^;]+\*\s*([0-9.]+)", src)
+CRIT_PER = float(m.group(1)) if m else 0.04
 m = re.search(r"if\(isCrit\) dmg \*= ([0-9.]+);", src)
 CRIT_MUL = float(m.group(1)) if m else 2.0
+m = re.search(r"hero\.stat\.as\s*=\s*[^;]+\*\s*([0-9.]+)", src)
+AS_PER = float(m.group(1)) if m else 0.05
 
-# ── 期望数组 ──
-m = re.search(r"var EXPECTED_DPS = \[([0-9.,\s]+)\];", src)
-EXPECTED = [int(float(x)) for x in m.group(1).split(",")] if m else []
-
-# ── 配装假设（与数值表「玩家成长」一致）──
+# ── 标准配装假设：每波武器组合 + 各流派精通等级 ──
+# 与 docs/爆裂弓箭手_数值分析表.xlsx「玩家成长」一致。
 BUILD = [
-    (1,  [("bow", 1)], 0, 0, 0),
-    (2,  [("bow", 2)], 0, 0, 0),
-    (3,  [("bow", 3), ("laser", 1)], 1, 0, 0),
-    (4,  [("bow", 4), ("laser", 2)], 2, 0, 0),
-    (5,  [("bow", 5), ("laser", 3), ("scythe", 2)], 2, 1, 0),
-    (6,  [("bow", 5), ("laser", 4), ("scythe", 3), ("bomb", 2)], 3, 2, 0),
-    (7,  [("bow", 5), ("laser", 4), ("scythe", 3), ("bomb", 3)], 3, 2, 1),
-    (8,  [("bow", 5), ("laser", 5), ("scythe", 4), ("bomb", 3)], 4, 3, 2),
-    (9,  [("bow", 5), ("laser", 5), ("scythe", 5), ("bomb", 4)], 4, 4, 3),
-    (10, [("bow", 5), ("laser", 5), ("scythe", 5), ("bomb", 5)], 5, 5, 5),
+    (1,  [("bow", 1)],                          {"shot": 0, "melee": 0, "throw": 0}),
+    (2,  [("bow", 2)],                          {"shot": 0, "melee": 0, "throw": 0}),
+    (3,  [("bow", 3), ("laser", 1)],            {"shot": 1, "melee": 0, "throw": 0}),
+    (4,  [("bow", 4), ("laser", 2)],            {"shot": 2, "melee": 0, "throw": 0}),
+    (5,  [("bow", 5), ("laser", 3), ("scythe", 2)], {"shot": 2, "melee": 1, "throw": 0}),
+    (6,  [("bow", 5), ("laser", 4), ("scythe", 3), ("bomb", 2)], {"shot": 3, "melee": 2, "throw": 1}),
+    (7,  [("bow", 5), ("laser", 4), ("scythe", 3), ("bomb", 3)], {"shot": 3, "melee": 2, "throw": 2}),
+    (8,  [("bow", 5), ("laser", 5), ("scythe", 4), ("bomb", 3)], {"shot": 4, "melee": 3, "throw": 3}),
+    (9,  [("bow", 5), ("laser", 5), ("scythe", 5), ("bomb", 4)], {"shot": 4, "melee": 4, "throw": 4}),
+    (10, [("bow", 5), ("laser", 5), ("scythe", 5), ("bomb", 5)], {"shot": 5, "melee": 5, "throw": 5}),
 ]
 
 
-def dps_of(loadout, atk_lv, as_lv, crit_lv):
-    base = 0.0
+def dps_of(loadout, passive, single=False):
+    """single=True 用 sHit（对 BOSS），否则用 coef（清怪）。"""
+    arch_count = {}
+    for wid, lv in loadout:
+        a = WEAPONS[wid]["arch"]
+        arch_count[a] = arch_count.get(a, 0) + 1
+    total = 0.0
     for wid, lv in loadout:
         d = WEAPONS[wid]
-        base += d["dmg"][lv - 1] * d["cnt"][lv - 1] / d["cd"][lv - 1] * d["coef"]
-    atk = 1 + atk_lv * ATK_PER
-    as_ = 1 + as_lv * AS_PER
-    crit = 1 + (CRIT_BASE + crit_lv * CRIT_PER) * (CRIT_MUL - 1)
-    return base * atk * as_ * crit, base
+        a = d["arch"]
+        mul = 1 + passive.get(a, 0) * ARCH_DMG
+        if arch_count.get(a, 0) >= 2:
+            mul *= SET_BONUS
+        coef = d["sHit"] if single else d["coef"]
+        total += d["dmg"][lv - 1] * d["cnt"][lv - 1] / d["cd"][lv - 1] * coef * d["hitMul"] * mul
+    crit = 1 + (CRIT_BASE + passive.get("throw", 0) * CRIT_PER) * (CRIT_MUL - 1)
+    return total * crit
 
 
 print("提取到的参数：")
-print(f"  攻击/级 {ATK_PER}  攻速/级 {AS_PER}  暴击/级 {CRIT_PER}  暴击倍率 {CRIT_MUL}")
-print()
-print("武器 Lv5 清怪DPS：")
+print(f"  流派精通/级 {ARCH_DMG}  套装 {SET_BONUS}  暴击 {CRIT_BASE}+{CRIT_PER}/级×{CRIT_MUL}")
+print("  武器 Lv5 清怪DPS：")
 for wid in ("bow", "laser", "scythe", "bomb", "shuriken", "spike"):
     d = WEAPONS[wid]
-    v = d["dmg"][4] * d["cnt"][4] / d["cd"][4] * d["coef"]
-    print(f"  {wid:9s} {v:7.1f}")
-vals = [WEAPONS[w]["dmg"][4] * WEAPONS[w]["cnt"][4] / WEAPONS[w]["cd"][4] * WEAPONS[w]["coef"]
-        for w in WEAPONS]
-print(f"  最强/最弱 = {max(vals)/min(vals):.2f} 倍  {'✓ 达标' if max(vals)/min(vals) <= 1.3 else '✗ 超过 1.3'}")
+    v = d["dmg"][4] * d["cnt"][4] / d["cd"][4] * d["coef"] * d["hitMul"]
+    print(f"    {wid:9s} {v:7.1f}")
 
+m = re.search(r"var EXPECTED_DPS = \[([0-9.,\s]+)\];", src)
+EXPECTED = [int(float(x)) for x in m.group(1).split(",")] if m else []
 print()
 print("波次  DPS(实算)  EXPECTED_DPS  偏差")
 ok = 0
-for wv, load, a, b, c in BUILD:
-    v, _ = dps_of(load, a, b, c)
-    exp = EXPECTED[wv - 1] if wv - 1 < len(EXPECTED) else None
+suggest = []
+for wv, load, passive in BUILD:
+    v = dps_of(load, passive, single=False)
+    suggest.append(round(v))
+    exp = EXPECTED[wv - 1] if wv - 1 < len(EXPECTED) else 0
     diff = (v - exp) / exp * 100 if exp else 0
     flag = "✓" if abs(diff) <= 6 else "✗"
     if abs(diff) <= 6:
@@ -109,7 +115,16 @@ for wv, load, a, b, c in BUILD:
 print()
 print(f"自洽检查：{ok}/10 波在 ±6% 内")
 if ok < 10:
-    print("需要把上面「DPS(实算)」列四舍五入后写回 index.html 的 EXPECTED_DPS")
-    print("建议数组：[" + ", ".join(str(round(dps_of(l, a, b, c)[0])) for _, l, a, b, c in BUILD) + "]")
+    print("建议数组：[" + ", ".join(str(x) for x in suggest) + "]")
+    if "--write" in sys.argv:
+        new = "var EXPECTED_DPS = [" + ", ".join(str(x) for x in suggest) + "];"
+        src2 = re.sub(r"var EXPECTED_DPS = \[[0-9.,\s]+\];", new, src, count=1)
+        if src2 != src:
+            open(HTML, "w", encoding="utf-8").write(src2)
+            print("已写回 index.html")
+        else:
+            print("写回失败：未找到 EXPECTED_DPS")
+    else:
+        print("加 --write 可把建议值写回 index.html")
     sys.exit(1)
-print("EXPECTED_DPS 与武器参数一致（这张表是标准配装参考值；BOSS 血量另有按实时 DPS 的派生逻辑）")
+print("EXPECTED_DPS 与武器参数一致")

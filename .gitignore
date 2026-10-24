@@ -13,3 +13,7 @@ desktop.ini
 node_modules/
 dist/
 *.log
+
+# 无头浏览器调试用缓存（测试跑完后可手动删除）
+_edgeprofile/
+_edgeprofile2/

@@ -177,3 +177,36 @@ node tests/audio-start.test.mjs
 **改了这些就该跑一次**：`SEC` 段落配器表、`SONG` 的 bpm/段落、任何乐器函数（`bassNote` / `pad` / `arpNote` / `leadNote`）、`start` / `setMode` 里的增益曲线。
 
 如果某次结果出现「方差 > 3 倍」或「有超长样本」，先看那个样本的配装是什么，再决定是改血量还是改武器机制。第 10 波的近战流问题就是这么发现的。
+
+---
+
+## 九、v0.11 新增的回归点
+
+### 数值自洽校验（改武器后必跑）
+
+```bash
+python docs/tools/calc_curve.py          # 只校验
+python docs/tools/calc_curve.py --write  # 校验不过时把建议值写回 index.html
+```
+
+脚本已更新到「流派精通 + 同流派双持 ×1.30 + 投掷暴击 + 飞镖双程 hitMul」模型。
+判定线：10 波全部在 ±6% 内。它读的是 index.html 里的 `WDEF` 和乘区常量，不是抄一份常量，所以改代码后直接跑即可。
+
+### 超武演出与飞镖（v0.11）
+
+现有的 `ult.test.mjs`（9 条）覆盖了六个超武的释放与结算；飞镖改动额外要看的点：
+
+| 检查 | 方法 | 合格线 |
+|---|---|---|
+| 飞镖双段命中 | 对一个高血木桩采样 HP 台阶 | 至少 2 次（去程 + 回程） |
+| 飞镖轨迹连续 | 截图看 `shuPathPool` 弧线 | 低帧率下不断线（按方程反算，与帧率无关） |
+| 箭雨覆盖 | 放超武后读 `POW.skyArrows.length` | 持续 >0，1.8 秒约 88 支 |
+| 飞镖/弓单体 DPS 比 | 木桩基准实测 | 1.1-1.5 倍（当前 1.21） |
+
+截图归档：`screenshots/v011-arrow-rain.png`（箭雨）、`screenshots/v011-shuriken-path.png`（飞镖轨迹）。
+
+### 改了这些就该跑一次
+
+- `WDEF` 任何数值 → `calc_curve.py` + `ult.test.mjs` + 木桩 DPS 实测
+- 超武 `ULT` 表（周期/时长/伤害倍率） → `ult.test.mjs` + boss-ttk
+- 渲染池（`instPool` 容量、几何） → 布局测试 + 看控制台 JS 错误
