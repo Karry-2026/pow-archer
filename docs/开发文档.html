@@ -242,11 +242,11 @@ footer{
 
 <header>
   <div class="hd-in">
-    <div class="hd-kicker">PROJECT DOCUMENT · 2026-10-24</div>
+    <div class="hd-kicker">PROJECT DOCUMENT · 2026-10-26 · v0.14.1</div>
     <h1>爆裂弓箭手</h1>
     <div class="hd-sub">2.5D 俯视割草 · 美漫风格 · 单文件网页游戏</div>
     <div class="hd-meta">
-      <span class="chip">版本 <b>v0.7</b></span>
+      <span class="chip">版本 <b>v0.14.1</b></span>
       <span class="chip">类型 <b>网页应用</b></span>
       <span class="chip">引擎 <b>Three.js</b></span>
       <span class="chip">仓库 <b>私有</b></span>
@@ -256,10 +256,10 @@ footer{
 </header>
 
 <div class="stats">
-  <div class="stat c1"><div class="k">当前版本</div><div class="v">v0.7</div><div class="n">可玩 · 已上线</div></div>
-  <div class="stat c2"><div class="k">武器 / 被动</div><div class="v">6 / 6</div><div class="n">另有 6 个超武进化</div></div>
+  <div class="stat c1"><div class="k">当前版本</div><div class="v">v0.14.1</div><div class="n">可玩 · 已上线 · 38 次提交</div></div>
+  <div class="stat c2"><div class="k">武器 / 被动</div><div class="v">6 / 6</div><div class="n">3 流派精通 + 3 通用，6 个超武</div></div>
   <div class="stat c3"><div class="k">敌人 / BOSS</div><div class="v">4 / 2</div><div class="n">第 5 波、第 10 波</div></div>
-  <div class="stat c4"><div class="k">单文件体积</div><div class="v">183 KB</div><div class="n">零外部素材</div></div>
+  <div class="stat c4"><div class="k">单文件体积</div><div class="v">267 KB</div><div class="n">6,069 行 · 零外部素材</div></div>
 </div>
 
 <div class="tabs" id="tabs">
@@ -267,6 +267,7 @@ footer{
   <button data-p="prd">需求与设计</button>
   <button data-p="num">数值机制</button>
   <button data-p="dev">开发记录</button>
+  <button data-p="ver">版本管理</button>
   <button data-p="todo">问题与待办</button>
 </div>
 
@@ -291,7 +292,7 @@ footer{
     </div>
     <div class="card">
       <div class="cb">终局</div>
-      <div class="ct">满级 + 对应被动 = 超武进化</div>
+      <div class="ct">满级 + 同流派精通 3 级 = 超武进化</div>
       <div class="cd">6 把武器各有 1 个超武，整局只能选一个。选完锁定，这条路就关死了。</div>
     </div>
     <div class="card">
@@ -376,7 +377,7 @@ footer{
   <table>
     <thead><tr><th>系统</th><th>状态</th><th>做什么</th><th>关键设计决策</th></tr></thead>
     <tbody>
-      <tr><td><b>移动</b></td><td><span class="tag t-ok">完成</span></td><td>WASD / 方向键 / 触屏摇杆</td><td>只做走位，不给玩家射击键，所有注意力留给躲</td></tr>
+      <tr><td><b>移动</b></td><td><span class="tag t-ok">完成</span></td><td>WASD / 方向键 / 触屏按住任意位置拖拽（v0.12 删掉摇杆视觉层）</td><td>只做走位，不给玩家射击键，所有注意力留给躲</td></tr>
       <tr><td><b>自动索敌</b></td><td><span class="tag t-ok">完成</span></td><td>每把武器各自锁最近的敌人</td><td>武器越多越乱，这是刻意的：多武器要付出手感代价</td></tr>
       <tr><td><b>升级三选一</b></td><td><span class="tag t-ok">完成</span></td><td>武器升级 / 新武器 / 被动 / 超武 / 治疗</td><td>卡池永不为空：满级武器可以无限叠「极限突破」</td></tr>
       <tr><td><b>超武进化</b></td><td><span class="tag t-ok">完成</span></td><td>6 把武器各 1 个进化形态</td><td>整局只能选一个，选完锁定，逼迫玩家确定流派</td></tr>
@@ -423,8 +424,8 @@ footer{
     <thead><tr><th>场景</th><th>BPM</th><th>小节</th><th>调性</th><th>段落结构</th></tr></thead>
     <tbody>
       <tr><td>菜单</td><td>82</td><td>16</td><td>Am9 · Fmaj7 · Cmaj7 · G6</td><td>前奏 1 + 主歌 6 + 副歌 8 + 尾奏 1（46.8 秒）</td></tr>
-      <tr><td>战斗</td><td>134</td><td>32</td><td>Am · F · C · G</td><td>主歌 4 + 副歌 4 + 高潮 8（第二波升八度）+ 回落 4 + 副歌 4 + 高潮 4 + 收束 4（57.3 秒）</td></tr>
-      <tr><td>BOSS</td><td>152</td><td>24</td><td>Dm · Bb · F · C</td><td>主歌 4 + 副歌 4 + 高潮 8（第二波升八度）+ 高潮 4 + 收束 4（37.9 秒）</td></tr>
+      <tr><td>战斗</td><td>134</td><td>52</td><td>Am · F · C · G</td><td>主歌 8 + 副歌 4 + 高潮 12（c / c2 升八度 / c）+ 回落 4 + 副歌 4 + 高潮 12 + 收束 4 + 尾奏 4（93.1 秒）</td></tr>
+      <tr><td>BOSS</td><td>152</td><td>32</td><td>Dm · Bb · F · C</td><td>主歌 4 + 副歌 4 + 高潮 8（第二波升八度）+ 回落 4 + 高潮 8 + 收束 4（50.5 秒）</td></tr>
     </tbody>
   </table>
   </div>
@@ -632,7 +633,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   <table>
     <thead><tr><th>选择</th><th>理由</th><th>放弃了什么</th></tr></thead>
     <tbody>
-      <tr><td><b>单文件 HTML</b></td><td>打开就能玩，不会因为资源加载失败白屏。参赛评审点开链接第一个要求是「别报错」</td><td>可维护性。现在 4,600 行，再加功能会变难改</td></tr>
+      <tr><td><b>单文件 HTML</b></td><td>打开就能玩，不会因为资源加载失败白屏。参赛评审点开链接第一个要求是「别报错」</td><td>可维护性。现在 6,069 行（脚本 4,926 行），再加功能会变难改</td></tr>
       <tr><td><b>Three.js（CDN + 备源）</b></td><td>3D 渲染够用，体积小（核心 150KB）</td><td>Godot 的可视化编辑器和原生导出</td></tr>
       <tr><td><b>全程序化几何</b></td><td>零素材文件，零版权风险，加载即用</td><td>精细度。模型都是基础几何拼的</td></tr>
       <tr><td><b>Web Audio 合成</b></td><td>零音频文件，循环天然无缝，不用找版权音乐</td><td>真实乐器质感。音色只能是合成器</td></tr>
@@ -642,64 +643,42 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   </div>
 
   <h2>版本时间线</h2>
+  <p>共 14 个 MINOR 版本，加本次文档回填 v0.14.1。逐版的提交号、代码行数、标签见「版本管理」页。</p>
   <div class="tl">
-    <div class="ev">
-      <div class="et">v0.1 · 第一版</div>
-      <div class="en">能跑起来的 3D 割草</div>
-      <div class="ed">俯视相机、自动索敌、6 把武器、4 种小怪、升级三选一。这一版的美漫渲染（色阶着色 + 描边 + 网点）从头就在。</div>
-    </div>
-    <div class="ev">
-      <div class="et">v0.2 · 需求文档化</div>
-      <div class="en">把「凭感觉改」换成「按文档改」</div>
-      <div class="ed">建立 PRD / 开发日志 / 调研资料三份文档。修了 5 个致命 bug，其中一个「BOSS 出场后永久白屏」的根因是闪白效果只有累加没有衰减。</div>
-    </div>
-    <div class="ev">
-      <div class="et">v0.3 · 建模与曲线</div>
-      <div class="en">小怪从「一团」变成「有脸的怪」</div>
-      <div class="ed">4 种小怪改成多部件拼装（球体 + 眼睛 + 触须 / 刺 / 牙 / 手臂），用顶点色合并成单一几何，所以 still 只有 2 个 draw call。难度曲线从锯齿改成单调递增。</div>
-    </div>
-    <div class="ev">
-      <div class="et">v0.4 · 白天化</div>
-      <div class="en">整套换配色，修掉「身上有斑点」</div>
-      <div class="ed">斑点的根因不是贴图重合，是描边用「整体放大 13%」，对头部这种小部件会把整个头包成黑色。改成沿法线外扩固定厚度。同时加竖屏遮罩、超武唯一性、文案去英文缩写。</div>
-    </div>
-    <div class="ev">
-      <div class="et">v0.10 · 构筑系统</div>
-      <div class="en">从「乱加点」变成「选一条线」</div>
-      <div class="ed">6 个全局乘区被动换成 3 张流派精通 + 3 张通用；同线双持给套装加成；卡池加权把玩家往一条线上推；超武前置改成本流派 3 级。六个超武各加一个蓄力必杀（空格释放）。震屏改 trauma 累加，投掷手加 0.45 秒抬手预警，敌弹换成洋红 + 白核 + 黑壳 + 拖尾。BOSS 拉到 32/45 秒，靠转阶段与护盾而不是堆血。</div>
-    </div>
-    <div class="ev">
-      <div class="et">v0.5 · 数值重做</div>
-      <div class="en">发现玩家 DPS 涨 259 倍、敌人只涨 3 倍</div>
-      <div class="ed">两条曲线在第 4 波交叉后再无交集，所以「前期打不动、后期全是纸、BOSS 最脆」。改成敌人血量指数增长、BOSS 血量按 DPS 派生、武器调平（最强最弱从 2.7 倍收到 1.26 倍）。</div>
-    </div>
-    <div class="ev">
-      <div class="et">v0.6 · 内容治理</div>
-      <div class="en">建立内容总表，修「宝箱自动加武器」</div>
-      <div class="ed">查「蓝耳朵黄身体的怪隐形」查了很久，因为没有一份人话的对照表，只有 blob/spiker/chunk 四个 ID。于是建了内容总表（颜色格子直接填真实配色）。</div>
-    </div>
-    <div class="ev">
-      <div class="et">v0.7 · 本轮</div>
-      <div class="en">音乐重做、两个 BOSS、图鉴、主页改版</div>
-      <div class="ed">音乐从四小节无限重复改成段落式曲式；BOSS 从同一个墨魔王拆成两种异兽并加清场单挑；加图鉴；修「丢炸弹卡脚」。</div>
-    </div>
+    <div class="ev"><div class="et">v0.1 · 第一版</div><div class="en">能跑起来的 3D 割草</div><div class="ed">俯视相机、自动索敌、6 把武器、4 种小怪、升级三选一。美漫渲染（色阶着色 + 描边 + 网点）从头就在。</div></div>
+    <div class="ev"><div class="et">v0.2 · 需求文档化</div><div class="en">把「凭感觉改」换成「按文档改」</div><div class="ed">建立 PRD / 开发日志 / 调研资料三份文档。修了 5 个致命 bug，其中一个「BOSS 出场后永久白屏」的根因是闪白效果只有累加没有衰减。</div></div>
+    <div class="ev"><div class="et">v0.3 · 建模与曲线</div><div class="en">小怪从「一团」变成「有脸的怪」</div><div class="ed">4 种小怪改成多部件拼装（球体 + 眼睛 + 触须 / 刺 / 牙），用顶点色合并成单一几何，仍然只有 2 个 draw call。难度曲线从锯齿改成单调递增。</div></div>
+    <div class="ev"><div class="et">v0.4 · 白天化</div><div class="en">整套换配色，修掉「身上有斑点」</div><div class="ed">斑点的根因不是贴图重合，是描边用「整体放大 13%」，对头部这种小部件会把整个头包成黑色。改成沿法线外扩固定厚度。同时加竖屏遮罩、超武唯一性。</div></div>
+    <div class="ev"><div class="et">v0.5 · 数值重做</div><div class="en">发现玩家 DPS 涨 259 倍、敌人只涨 3 倍</div><div class="ed">两条曲线在第 4 波交叉后再无交集，所以「前期打不动、后期全是纸、BOSS 最脆」。改成敌人血量指数增长、BOSS 血量按 DPS 派生、武器调平（最强最弱从 2.7 倍收到 1.26 倍）。</div></div>
+    <div class="ev"><div class="et">v0.6 · 内容治理</div><div class="en">建立内容总表，修「宝箱自动加武器」</div><div class="ed">查「蓝耳朵黄身体的怪隐形」查了很久，因为没有一份人话的对照表，只有 blob / spiker / chunk 四个 ID。于是建了内容总表（颜色格子直接填真实配色）。</div></div>
+    <div class="ev"><div class="et">v0.7 · 音乐与两个 BOSS</div><div class="en">从「一段循环」到「有结构的曲子」</div><div class="ed">音乐改成段落式曲式；BOSS 从同一个墨魔王拆成两种异兽并加清场单挑；加图鉴；加数值配置表（10 张 sheet）；开始有这份 HTML 手册。</div></div>
+    <div class="ev"><div class="et">v0.8 · 明度优先</div><div class="en">配色不再按色相调，按明度调</div><div class="ed">地面明度 95 → 82；经验球靠黑描边壳（BackSide + 放大 1.34）而不是靠色相拉开。BOSS 血量从查表改成开战实测 DPS 现算，顺手删掉 2,600 的下限保护。结算加「回到主菜单」。</div></div>
+    <div class="ev"><div class="et">v0.9 · 起播没声音</div><div class="en">1.07 秒才可听，全是自己加的</div><div class="ed">1.4 秒指数淡入 + 首音预排 100ms + 最薄小节放最前，三个原因叠加。改成 62% 起、0.22 秒补满。留下一条判断：没有前态可过渡的时刻不要淡入。</div></div>
+    <div class="ev"><div class="et">v0.10 · 构筑系统</div><div class="en">从「乱加点」变成「选一条线」</div><div class="ed">6 个全局乘区被动换成 3 张流派精通 + 3 张通用；同线双持给套装加成；卡池加权把玩家往一条线上推；超武前置改成本流派 3 级。六个超武各加一个蓄力必杀。震屏改 trauma 累加，投掷手加 0.45 秒抬手预警，敌弹换成洋红 + 白核 + 拖尾。BOSS 拉到 32 / 45 秒，靠转阶段与护盾而不是堆血。</div></div>
+    <div class="ev"><div class="et">v0.11 · 超武演出</div><div class="en">让「放必杀」有明确反馈</div><div class="ed">全屏色染 + 超武名大字 + 推镜；天降落箭重做（不再用屏幕空间算落点）；飞镖改成去程 + 回程双弧。同时把三张数值表和手册全部对齐代码 —— 之前文档落后了三个版本。</div></div>
+    <div class="ev"><div class="et">v0.12 · 第一批真机反馈</div><div class="en">手机 HUD 推倒重排，摇杆整层删掉</div><div class="ed">顶部 84 → 67px，等级并入左上、波次合并、提示条下移，三层文字不再叠。摇杆圆盘画到屏幕外的根因是容器原点偏了 42vh —— 输入本来就走 canvas，删掉视觉层不影响操作。震屏改成同批事件边际递减。</div></div>
+    <div class="ev"><div class="et">v0.13 · 第二批真机反馈</div><div class="en">BGM 加到 93 秒，地刺改成远程布设</div><div class="ed">战斗曲 32 → 52 小节、BOSS 24 → 32 小节。高潮「抬不起来」的真实原因是混音：旋律音量 0.072 被 0.30 的贝斯压住，改后中高频 RMS 涨 2.5–2.8 倍而总 RMS 平稳。地刺改成目标脚下布设 + 减速 0.65。激光改红，技能按钮移右下。</div></div>
+    <div class="ev"><div class="et">v0.14 · 开始界面重做</div><div class="en">从「两张卡片」到「整屏一刀切开」</div><div class="ed">旧模型的问题是盒子并排，屏幕一矮两个盒子一起缩，只能靠三层媒体查询硬补。新结构整屏被斜切光带分成纸面 / 墨面两块，几何由 <code>title.test.mjs</code> 断言守边界。激光从正红改石蓝 <code>#4a7fb8</code>（围墙色系取色，压暗降饱和）。静音统一到右上角。</div></div>
+    <div class="ev"><div class="et">v0.14.1 · 文档回填</div><div class="en">把四个地方的版本号对齐</div><div class="ed">README 写 v0.10、手册页头写 v0.7、笔记停在 v0.7，DEVLOG 却已经到 v0.14。新建版本主表 <code>docs/VERSIONS.md</code>，手册补到当前版，<code>index.html</code> 加 <code>app-version</code> meta，git 回填 13 个标签。</div></div>
   </div>
 
-  <h2>这一轮改了什么</h2>
+  <h2>v0.7 → v0.14：七版累计改了什么</h2>
   <div class="tw">
   <table>
-    <thead><tr><th>项</th><th>之前</th><th>现在</th></tr></thead>
+    <thead><tr><th>项</th><th>v0.7</th><th>现在</th></tr></thead>
     <tbody>
-      <tr><td><b>命名</b></td><td>标题写 POW! ARCHER，副标题「墨潮割草」</td><td>统一「爆裂弓箭手」，副标题「十波死斗 · 两大异兽」</td></tr>
-      <tr><td><b>背景音乐</b></td><td>四小节循环，只有两个模式</td><td>三首段落式曲子：菜单 8 小节 / 战斗 16 小节 / BOSS 16 小节</td></tr>
-      <tr><td><b>转场音效</b></td><td>只有进游戏一声「咻」</td><td>进游戏上扬、暂停下坠、恢复上扬，三个方向明确</td></tr>
-      <tr><td><b>BOSS</b></td><td>两个波次同一个「墨魔王」</td><td>裂口巨兽（贴地冲锋）/ 千手墨神（悬浮弹幕）</td></tr>
-      <tr><td><b>BOSS 战</b></td><td>小兵和 BOSS 混着打</td><td>清场 → 白闪 → BOSS 从地下升起 → 单挑</td></tr>
-      <tr><td><b>炸弹震屏</b></td><td>顿帧把玩家一起冻住 0.05 秒</td><td>只冻结世界，玩家移动和开火不受影响</td></tr>
-      <tr><td><b>升级反馈</b></td><td>只有屏幕闪白</td><td>额外加金色冲击波 + 大球吸收飘字</td></tr>
-      <tr><td><b>图鉴</b></td><td>没有</td><td>主页入口，三个页签 24 张卡</td></tr>
-      <tr><td><b>主页</b></td><td>斜切面板，密度是四个散按钮</td><td>圆角卡片 + 分段控件 + 主按钮/图鉴并排</td></tr>
-      <tr><td><b>数值表</b></td><td>分析表 + 内容总表</td><td>新增配置表，10 张 sheet，带代码变量列</td></tr>
+      <tr><td><b>开始界面</b></td><td>两张卡片并排，靠三层媒体查询硬撑</td><td>整屏斜切「一刀破开」，几何断言守边界</td></tr>
+      <tr><td><b>手机 HUD</b></td><td>顶部 84px，等级 / 波次 / 提示三层叠在一起</td><td>顶部 67px，等级并入左上，波次合并，提示条下移</td></tr>
+      <tr><td><b>移动输入</b></td><td>左半屏拖拽 + 可视摇杆</td><td>屏幕任意位置拖拽，摇杆视觉层删除</td></tr>
+      <tr><td><b>被动</b></td><td>6 个全局乘区</td><td>3 流派精通 + 3 通用，同线双持 ×1.30</td></tr>
+      <tr><td><b>超武</b></td><td>6 个进化形态，无主动技</td><td>各带一个蓄力必杀（空格 / 蓄力环）</td></tr>
+      <tr><td><b>激光</b></td><td>黄，和箭共用渲染池，看起来一样</td><td>石蓝 <code>#4a7fb8</code>，单开队列与实例池</td></tr>
+      <tr><td><b>震屏</b></td><td><code>Math.max</code> 顶回同一强度，连炸抽四下</td><td>trauma 累加 + 平方映射，同批事件边际递减</td></tr>
+      <tr><td><b>BOSS</b></td><td>32 秒目标，血量查表</td><td>32 / 45 秒，血量按实测 DPS 派生，62% 转阶段 / 30% 狂暴</td></tr>
+      <tr><td><b>敌弹</b></td><td>黄色，和经验球撞色，无预警</td><td>洋红 + 白核 + 黑壳 + 拖尾，投掷手 0.45 秒抬手</td></tr>
+      <tr><td><b>战斗曲</b></td><td>16 小节 / 28.7 秒</td><td>52 小节 / 93.1 秒，高潮出现两次共 43 秒</td></tr>
+      <tr><td><b>结算</b></td><td>只有「再来一局」</td><td>再来一局 + 回到主菜单</td></tr>
+      <tr><td><b>代码规模</b></td><td>4,611 行 / 182 KB</td><td>6,069 行 / 267 KB</td></tr>
     </tbody>
   </table>
   </div>
@@ -723,6 +702,96 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <tr><td>远程怪打过来没有预警</td><td>投掷手冷却一到直接生成子弹，零前摇；且敌弹是黄色，和经验球/爆炸撞色</td><td>威胁色必须独占色系。黄橙子弹是弹幕游戏公认的坏选择</td></tr>
       <tr><td>平衡测试全部「超时」</td><td>用墙钟计时，而软渲染把帧率压到个位数、主循环 dt 上限 0.05 → 游戏时间比墙钟慢几倍</td><td>测游戏内时长要用游戏时钟（<code>S.t</code>），不能用 <code>performance.now()</code></td></tr>
       <tr><td>千手墨神的手臂全消失</td><td>动画读 <code>userData.rz</code>，新模型没写 → <code>undefined + 数字 = NaN</code></td><td>NaN 不会报错，只会让矩阵失效。新模型必须补齐动画依赖的字段</td></tr>
+      <tr><td>手机摇杆圆盘画到手指下方 42vh</td><td>输入用的是 canvas 上的 <code>clientX/Y</code>，视觉层却塞在 <code>position:absolute</code> 的 <code>#stick</code> 容器里，原点偏在屏幕底</td><td>输入层和视觉层要分开写。删视觉之前先确认逻辑不读它</td></tr>
+      <tr><td>升级卡的斜条纹压在字上</td><td>伪元素默认画在内容之上，颜色又和字一样深</td><td>装饰层要么退到文字下层，要么 <code>z-index:-1</code></td></tr>
+      <tr><td>手机顶部三层文字重叠</td><td>等级、波次、提示条抢同一块区域，各自留白</td><td>先量 <code>getBoundingClientRect</code> 再改样式，别凭截图调边距</td></tr>
+      <tr><td>进游戏后标题页还盖着 HUD</td><td><code>#scr-title{display:block}</code> 是 ID 选择器，压过 <code>.screen.hide{display:none}</code></td><td>改 <code>display</code> 前先查有没有更具体的选择器在管同一个元素</td></tr>
+      <tr><td>蓄力环压住右下武器槽</td><td>两个固定定位的 HUD 元素抢同一个角</td><td>固定 HUD 要有位置预算，不能每次发现重叠就单独让位</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══════════════ 版本管理 ══════════════ -->
+<section class="panel hide" id="p-ver">
+  <h2>一句话</h2>
+  <p><strong>版本号、git 提交、在线链接三者必须能对上。</strong>线上出问题，要能立刻知道跑的是哪一版，并且能退回任何一个可玩状态。这一页是 <code>docs/VERSIONS.md</code> 的摘要，完整版（含回滚命令）在仓库里。</p>
+
+  <h2>版本表</h2>
+  <div class="tw">
+  <table>
+    <thead><tr><th>版本</th><th>日期</th><th>提交</th><th>主题</th><th>规模</th></tr></thead>
+    <tbody>
+      <tr><td><b>v0.1</b></td><td>10-23 01:14</td><td>—</td><td>第一版能跑的 3D 割草</td><td>—</td></tr>
+      <tr><td><b>v0.2</b></td><td>10-23 01:46</td><td><code>2f73032</code></td><td>需求文档化 + 5 个致命 bug</td><td>2,547 行 / 95 KB</td></tr>
+      <tr><td><b>v0.3</b></td><td>10-23 02:11</td><td><code>5b45553</code></td><td>小怪建模重做，曲线改单调</td><td>2,690 行 / 102 KB</td></tr>
+      <tr><td><b>v0.4</b></td><td>10-23 03:10</td><td><code>1564caf</code></td><td>白天化、竖屏适配、超武唯一</td><td>3,105 行 / 118 KB</td></tr>
+      <tr><td><b>v0.5</b></td><td>10-23 15:50</td><td><code>c5d9780</code></td><td>数值重做（曲线对齐 + 武器调平）</td><td>3,426 行 / 131 KB</td></tr>
+      <tr><td><b>v0.6</b></td><td>10-23 17:08</td><td><code>72e6015</code></td><td>内容总表，宝箱不再塞武器</td><td>3,439 行 / 132 KB</td></tr>
+      <tr><td><b>v0.7</b></td><td>10-24 00:49</td><td><code>5d1549a</code></td><td>曲式音乐、两个 BOSS、图鉴、配置表、HTML 手册</td><td>4,611 行 / 182 KB</td></tr>
+      <tr><td><b>v0.8</b></td><td>10-24 01:32</td><td><code>6d81a4e</code></td><td>明度优先配色，BOSS 血量改实时派生</td><td>4,815 行 / 193 KB</td></tr>
+      <tr><td><b>v0.9</b></td><td>10-24 01:52</td><td><code>0908ed3</code></td><td>修起播 1 秒多没声音</td><td>4,853 行 / 196 KB</td></tr>
+      <tr><td><b>v0.10</b></td><td>10-24 04:04</td><td><code>78bb65e</code></td><td>三流派 + 套装、六超武必杀、震屏 trauma、BOSS 32/45</td><td>5,441 行 / 222 KB</td></tr>
+      <tr><td><b>v0.11</b></td><td>10-24 13:41</td><td><code>beba85f</code></td><td>超武全屏演出，天降落箭与飞镖重做</td><td>5,791 行 / 238 KB</td></tr>
+      <tr><td><b>v0.12</b></td><td>10-25 02:58</td><td><code>b0996af</code></td><td>手机 HUD 重排、删摇杆、震屏边际递减、战斗曲 32 小节</td><td>5,858 行 / 244 KB</td></tr>
+      <tr><td><b>v0.13</b></td><td>10-25 03:30</td><td><code>5f5fe26</code></td><td>BGM 93 秒、地刺远程、激光改红、技能按钮右下（与 v0.14 同一提交）</td><td>—</td></tr>
+      <tr><td><b>v0.14</b></td><td>10-25 03:54</td><td><code>5f5fe26</code></td><td>开始界面「一刀破开」、激光石蓝、静音右上</td><td>6,069 行 / 255 KB</td></tr>
+      <tr><td><b>v0.14.1</b></td><td>10-26 01:50</td><td>本次</td><td>文档回填 + 版本标记（只动文档与 2 行 meta）</td><td>6,071 行 / 255 KB</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note">
+    <b>两处对不上的地方，不粉饰</b>
+    v0.1 没有独立提交，仓库初始化时已经是 v0.2 —— 补造提交等于造一个假时间。v0.13 和 v0.14 共用 <code>5f5fe26</code>，所以 v0.13 没有自己的标签，要退回它只能取该提交再手动撤 v0.14 的三处改动。
+  </div>
+
+  <h2>两个仓库</h2>
+  <div class="tw">
+  <table>
+    <thead><tr><th>仓库</th><th>可见性</th><th>放什么</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>Karry-2026/pow-archer</code></td><td>私有</td><td>源码、文档、测试、截图、git 历史</td><td>开发与版本管理</td></tr>
+      <tr><td><code>Karry-2026/pow-archer-play</code></td><td>公开</td><td>只有 <code>index.html</code> + README</td><td>GitHub Pages，评审点开的就是这里</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>分开的原因：免费账号的 Pages 只支持公开仓库。公开的 <code>index.html</code> 和任何人按 F12 看到的内容完全一样，私有仓库保护的是开发过程、文档和提交历史，不是这份 HTML。</p>
+  <p><b>核对线上是不是最新</b>：打开在线地址，控制台执行 <code>document.querySelector('meta[name=app-version]').content</code>，返回 <code>v0.14.1</code> 就是这一版。</p>
+
+  <h2>发版流程</h2>
+  <pre><span class="k">1</span> 改代码（只动 index.html）
+<span class="k">2</span> 跑全部回归用例，全绿再往下
+<span class="k">3</span> 截图归档 screenshots/vXXX-*.png
+<span class="k">4</span> 写 DEVLOG：根因 / 做法 / 验证，缺根因不写
+<span class="k">5</span> 更新 VERSIONS.md 版本表与当前状态
+<span class="k">6</span> 改 index.html 的 app-version meta
+<span class="k">7</span> 同步本手册：状态条、时间线、版本表
+<span class="k">8</span> 更新 README 当前状态表
+<span class="k">9</span> commit → <span class="c">git tag -a vX.Y</span> → push --tags
+<span class="k">10</span> 复制 index.html 到部署仓库，提交，等一分钟验线上 meta</pre>
+
+  <h2>回滚</h2>
+  <div class="tw">
+  <table>
+    <thead><tr><th>场景</th><th>做法</th><th>影响</th></tr></thead>
+    <tbody>
+      <tr><td>线上某一版更好，想退回去</td><td>部署仓库历史里检出旧 <code>index.html</code> 提交</td><td>只影响线上，主仓库不动</td></tr>
+      <tr><td>代码改坏了</td><td><code>git checkout v0.10 -- index.html</code></td><td>覆盖工作区，先 <code>stash</code> 或先提交</td></tr>
+      <tr><td>想整体回到某版继续开发</td><td><code>git switch -c hotfix v0.10</code></td><td>新建分支，不动 main</td></tr>
+      <tr><td>只是想知道线上是哪版</td><td>控制台读 <code>app-version</code></td><td>只读</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>版本管理还没做的</h2>
+  <div class="tw">
+  <table>
+    <thead><tr><th>#</th><th>缺口</th><th>影响</th><th>打算</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>版本号只在 meta 里</td><td>玩家看不到自己玩的是哪版，反馈无法定位</td><td>暂停面板加一行小字</td></tr>
+      <tr><td>2</td><td>两个仓库靠手抄</td><td>忘同步就是线上落后，且不会报错</td><td>单文件时手抄划算，文件变多就写脚本</td></tr>
+      <tr><td>3</td><td>没有 CI</td><td>测试靠人记得跑</td><td>参赛后加 GitHub Actions，代价是每次装无头浏览器</td></tr>
+      <tr><td>4</td><td>v0.13 无独立标签</td><td>无法精确回滚到 v0.13</td><td>补标签要改写历史，不值得</td></tr>
     </tbody>
   </table>
   </div>
@@ -735,13 +804,13 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   <table>
     <thead><tr><th>#</th><th>问题</th><th>影响</th><th>打算怎么处理</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td><b>BOSS 血量已改为实时派生并压力测试</b></td><td>第 5 波 8 样本 6.5-16.6 秒（目标 12，偏差 1.08×）；第 10 波 4 样本 16.4-21.9 秒（目标 20，偏差 0.97×）</td><td>已解决。详见 <code>docs/TESTING.md</code>。仍需真人确认体感</td></tr>
+      <tr><td>1</td><td><b>BOSS 血量已改为实时派生并压力测试</b></td><td>第 5 波 8 样本 6.5-16.6 秒（目标 12，偏差 1.08×）；第 10 波 4 样本 16.4-21.9 秒（目标 20，偏差 0.97×）。多智能体压力测试已做，真人耗时仍缺</td><td>已解决。详见 <code>docs/TESTING.md</code>。仍需真人确认体感</td></tr>
       <tr><td>2</td><td><b>六把武器的强度差没实测</b></td><td>表里 Lv5 都在 130-180 区间，但那是理论 DPS，实战手感不同</td><td>你玩的时候留意哪把明显好用，我单独下调那一个的清怪系数</td></tr>
       <tr><td>3</td><td><b>真机帧率没测</b></td><td>无头浏览器是软件渲染，截图能看但不代表性能。第 10 波 150 只怪 + 卡通材质</td><td>你打开看右上角掉不掉帧，掉了我就降同屏上限</td></tr>
-      <tr><td>4</td><td><b>Three.js 走 CDN</b></td><td>评审打开必须联网。断网或 CDN 被墙就是白屏</td><td>可以内联 three.min.js，文件从 183KB 涨到 800KB，换零外网依赖</td></tr>
-      <tr><td>5</td><td><b>单文件已 4,600 行</b></td><td>再加功能会难维护，也不好做数值模拟</td><td>建议下个阶段拆模块。顺带为将来上 Steam 的引擎迁移铺路</td></tr>
+      <tr><td>4</td><td><b>Three.js 走 CDN</b></td><td>评审打开必须联网。断网或 CDN 被墙就是白屏</td><td>可以内联 three.min.js，文件从 267 KB 涨到约 420 KB，换零外网依赖</td></tr>
+      <tr><td>5</td><td><b>单文件已 6,069 行（脚本 4,926 行）</b></td><td>再加功能会难维护，也不好做数值模拟</td><td>建议下个阶段拆模块。顺带为将来上 Steam 的引擎迁移铺路</td></tr>
       <tr><td>6</td><td><b>超武强度没平衡</b></td><td>6 个进化形态，血月斩（范围 +60% + 吸血）可能明显强于其他</td><td>需要实测</td></tr>
-      <tr><td>7</td><td><b>手机摇杆手感</b></td><td>左半屏拖动，没有摇杆回中动画</td><td>可以加一个可见的虚拟摇杆底盘</td></tr>
+      <tr><td>7</td><td><b>触屏没有任何视觉反馈</b></td><td>v0.12 把摇杆视觉层整层删了，现在拖动只有镜头在动，手指下面什么都没有</td><td>如果收到「不知道手指有没有被识别」的反馈，最小成本是在触点画一个 44px 半透明细环，不做底座和摇杆头</td></tr>
     </tbody>
   </table>
   </div>
@@ -750,8 +819,8 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   <div class="grid">
     <div class="card">
       <div class="cb">P0</div>
-      <div class="ct">实测调 BOSS 与武器</div>
-      <div class="cd">你打两局，把「BOSS 打了多久」和「哪把武器最强」告诉我。数据比公式可靠。</div>
+      <div class="ct">真人试玩，调 BOSS 与武器</div>
+      <div class="cd">多智能体只能测输出上限，测不出手感。参赛截止 11-01 23:59，这一项优先于所有重构。</div>
     </div>
     <div class="card">
       <div class="cb">P1</div>
@@ -761,7 +830,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
     <div class="card">
       <div class="cb">P2</div>
       <div class="ct">拆分模块</div>
-      <div class="cd">把数值 / 实体 / 渲染 / 音频拆开。这样能脱离游戏跑数值模拟，也为引擎迁移铺路。</div>
+      <div class="cd">把数值 / 实体 / 渲染 / 音频拆开。这样能脱离游戏跑数值模拟，也为引擎迁移铺路。参赛后再动，赛前拆模块只会引入回归。</div>
     </div>
     <div class="card">
       <div class="cb">P3</div>
@@ -775,37 +844,41 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   <table>
     <thead><tr><th>操作</th><th>键盘</th><th>触屏</th></tr></thead>
     <tbody>
-      <tr><td>移动</td><td>WASD / 方向键</td><td>拖拽左半屏</td></tr>
+      <tr><td>移动</td><td>WASD / 方向键</td><td>按住屏幕任意位置滑动</td></tr>
       <tr><td>攻击</td><td>自动，无需操作</td><td>自动</td></tr>
       <tr><td>背包</td><td>TAB</td><td>点背包按钮</td></tr>
       <tr><td><b>超武必杀</b></td><td><b>空格</b>（蓄力满了才有效）</td><td>点右下角蓄力环</td></tr>
       <tr><td>暂停</td><td>ESC</td><td>点暂停按钮</td></tr>
-      <tr><td>静音</td><td>M</td><td>点左上角喇叭</td></tr>
+      <tr><td>静音</td><td>M</td><td>点右上角喇叭</td></tr>
     </tbody>
   </table>
   </div>
 
   <h2>文件结构</h2>
-  <pre>index.html                        游戏本体（单文件，HTML+CSS+JS）
-docs/爆裂弓箭手_数值配置表.xlsx      <span class="k">调参入口</span>，10 张表
-docs/爆裂弓箭手_数值分析表.xlsx      TTK 推导与诊断
-docs/爆裂弓箭手_内容总表.xlsx        怪物/武器/被动的白话对照
-docs/开发文档.html                 <span class="k">本文件</span>
-docs/DEVLOG.md                     逐条开发日志（Markdown 原稿）
-docs/PRD.md                        需求文档（Markdown 原稿）
+  <pre>index.html                        游戏本体（单文件，6,069 行）
+docs/开发文档.html                 <span class="k">本文件</span>，六个标签页
+docs/VERSIONS.md                   <span class="k">版本主表</span>：提交号、规模、标签、发版流程、回滚
+docs/DEVLOG.md                     逐条开发日志（Markdown 原稿，根因优先）
+docs/PRD.md                        需求文档
 docs/RESEARCH.md                   调研资料与出处
+docs/TESTING.md                    平衡测试方案（四智能体）
+docs/NUMBERS.md                    数值推导说明
+docs/设计评审-流派与超武.md           v0.10 前的设计评审，只分析不改代码
+docs/爆裂弓箭手_数值配置表.xlsx      调参入口，10 张表，每行带代码变量列
+docs/爆裂弓箭手_数值分析表.xlsx      TTK 推导与诊断
+docs/爆裂弓箭手_内容总表.xlsx        怪物 / 武器 / 被动的白话对照
 docs/tools/build_config.py         重新生成配置表
 docs/tools/build_numbers.py        重新生成分析表
 docs/tools/build_content.py        重新生成内容总表
 docs/tools/calc_curve.py           校验 DPS 曲线与武器参数自洽
-tests/orient.test.mjs              屏幕方向判断用例（8 条）
-tests/orient-buttons.test.mjs      遮罩按钮绑定用例（12 条）
-tests/layout.test.mjs              六尺寸布局溢出检测（24 项）
-screenshots/                       各版本界面截图</pre>
+tests/*.test.mjs                   回归用例：方向 / 按钮 / 布局 / 开始界面 / 触屏 / 超武 / 构筑 / BOSS 阶段 / 音频
+tests/run-balance.mjs              四智能体平衡压测（自起 8913 端口）
+tests/results/                     测试输出存档
+screenshots/                       各版本界面截图，按 vXXX- 前缀归档</pre>
 
   <div class="note good">
     <b>怎么读这份文档</b>
-    「现在在做什么」是给你自己看的状态摘要；「需求与设计」是 PRD；「数值机制」解释每个数字为什么是那个数；「开发记录」是时间线和踩坑记录；这一页是还没解决的问题。改代码前先看这一页，避免改到已知问题。
+    「现在在做什么」是状态摘要；「需求与设计」是 PRD；「数值机制」解释每个数字为什么是那个数；「开发记录」是时间线、版本对比和踩坑记录；「版本管理」是提交号与发版流程；这一页是还没解决的问题。改代码前先看这一页，避免改到已知问题。
   </div>
 </section>
 
