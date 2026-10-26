@@ -242,11 +242,11 @@ footer{
 
 <header>
   <div class="hd-in">
-    <div class="hd-kicker">PROJECT DOCUMENT · 2026-10-26 · v0.14.1</div>
+    <div class="hd-kicker">PROJECT DOCUMENT · 2026-10-27 · v0.15</div>
     <h1>爆裂弓箭手</h1>
     <div class="hd-sub">2.5D 俯视割草 · 美漫风格 · 单文件网页游戏</div>
     <div class="hd-meta">
-      <span class="chip">版本 <b>v0.14.1</b></span>
+      <span class="chip">版本 <b>v0.15</b></span>
       <span class="chip">类型 <b>网页应用</b></span>
       <span class="chip">引擎 <b>Three.js</b></span>
       <span class="chip">仓库 <b>私有</b></span>
@@ -256,10 +256,10 @@ footer{
 </header>
 
 <div class="stats">
-  <div class="stat c1"><div class="k">当前版本</div><div class="v">v0.14.1</div><div class="n">可玩 · 已上线 · 39 次提交</div></div>
+  <div class="stat c1"><div class="k">当前版本</div><div class="v">v0.15</div><div class="n">可玩 · 已上线 · 40 次提交</div></div>
   <div class="stat c2"><div class="k">武器 / 被动</div><div class="v">6 / 6</div><div class="n">3 流派精通 + 3 通用，6 个超武</div></div>
   <div class="stat c3"><div class="k">敌人 / BOSS</div><div class="v">4 / 2</div><div class="n">第 5 波、第 10 波</div></div>
-  <div class="stat c4"><div class="k">单文件体积</div><div class="v">267 KB</div><div class="n">6,071 行 · 零外部素材</div></div>
+  <div class="stat c4"><div class="k">单文件体积</div><div class="v">263 KB</div><div class="n">6,102 行 · 零外部素材</div></div>
 </div>
 
 <div class="tabs" id="tabs">
@@ -380,7 +380,7 @@ footer{
       <tr><td><b>移动</b></td><td><span class="tag t-ok">完成</span></td><td>WASD / 方向键 / 触屏按住任意位置拖拽（v0.12 删掉摇杆视觉层）</td><td>只做走位，不给玩家射击键，所有注意力留给躲</td></tr>
       <tr><td><b>自动索敌</b></td><td><span class="tag t-ok">完成</span></td><td>每把武器各自锁最近的敌人</td><td>武器越多越乱，这是刻意的：多武器要付出手感代价</td></tr>
       <tr><td><b>升级三选一</b></td><td><span class="tag t-ok">完成</span></td><td>武器升级 / 新武器 / 被动 / 超武 / 治疗</td><td>卡池永不为空：满级武器可以无限叠「极限突破」</td></tr>
-      <tr><td><b>超武进化</b></td><td><span class="tag t-ok">完成</span></td><td>6 把武器各 1 个进化形态</td><td>整局只能选一个，选完锁定，逼迫玩家确定流派</td></tr>
+      <tr><td><b>超武进化</b></td><td><span class="tag t-ok">完成</span></td><td>6 把武器各 1 个进化形态</td><td>整局只能选一个，选完锁定，逼迫玩家确定流派。v0.15 起进池竞争（权重 1.4）而非必出，每级最多一张，连续 3 级没刷到保底</td></tr>
       <tr><td><b>流派精通</b></td><td><span class="tag t-ok">v0.10</span></td><td>3 条线（贴身 / 投掷 / 射击）各 1 张精通卡</td><td>精通只加成自己那条线的 2 把武器 —— 混着点会摊薄，这就是取舍的来源</td></tr>
       <tr><td><b>超武必杀</b></td><td><span class="tag t-ok">v0.11</span></td><td>蓄力环 + 空格释放；天降落箭 / 光柱 / 聚怪斩 / 空袭 / 超旋 / 地刺环</td><td>全屏色染 + 超武名大字 + 镜头推镜，让「放必杀」有明确反馈</td></tr>
       <tr><td><b>震屏</b></td><td><span class="tag t-ok">v0.10</span></td><td>trauma 累加 + 平方映射</td><td>连炸要合成一次长震；原来用 max 会让 4 颗炸弹抽 4 下</td></tr>
@@ -633,7 +633,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   <table>
     <thead><tr><th>选择</th><th>理由</th><th>放弃了什么</th></tr></thead>
     <tbody>
-      <tr><td><b>单文件 HTML</b></td><td>打开就能玩，不会因为资源加载失败白屏。参赛评审点开链接第一个要求是「别报错」</td><td>可维护性。现在 6,071 行（脚本 4,926 行），再加功能会变难改</td></tr>
+      <tr><td><b>单文件 HTML</b></td><td>打开就能玩，不会因为资源加载失败白屏。参赛评审点开链接第一个要求是「别报错」</td><td>可维护性。现在 6,102 行（脚本 4,957 行），再加功能会变难改</td></tr>
       <tr><td><b>Three.js（CDN + 备源）</b></td><td>3D 渲染够用，体积小（核心 150KB）</td><td>Godot 的可视化编辑器和原生导出</td></tr>
       <tr><td><b>全程序化几何</b></td><td>零素材文件，零版权风险，加载即用</td><td>精细度。模型都是基础几何拼的</td></tr>
       <tr><td><b>Web Audio 合成</b></td><td>零音频文件，循环天然无缝，不用找版权音乐</td><td>真实乐器质感。音色只能是合成器</td></tr>
@@ -659,6 +659,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
     <div class="ev"><div class="et">v0.12 · 第一批真机反馈</div><div class="en">手机 HUD 推倒重排，摇杆整层删掉</div><div class="ed">顶部 84 → 67px，等级并入左上、波次合并、提示条下移，三层文字不再叠。摇杆圆盘画到屏幕外的根因是容器原点偏了 42vh —— 输入本来就走 canvas，删掉视觉层不影响操作。震屏改成同批事件边际递减。</div></div>
     <div class="ev"><div class="et">v0.13 · 第二批真机反馈</div><div class="en">BGM 加到 93 秒，地刺改成远程布设</div><div class="ed">战斗曲 32 → 52 小节、BOSS 24 → 32 小节。高潮「抬不起来」的真实原因是混音：旋律音量 0.072 被 0.30 的贝斯压住，改后中高频 RMS 涨 2.5–2.8 倍而总 RMS 平稳。地刺改成目标脚下布设 + 减速 0.65。激光改红，技能按钮移右下。</div></div>
     <div class="ev"><div class="et">v0.14 · 开始界面重做</div><div class="en">从「两张卡片」到「整屏一刀切开」</div><div class="ed">旧模型的问题是盒子并排，屏幕一矮两个盒子一起缩，只能靠三层媒体查询硬补。新结构整屏被斜切光带分成纸面 / 墨面两块，几何由 <code>title.test.mjs</code> 断言守边界。激光从正红改石蓝 <code>#4a7fb8</code>（围墙色系取色，压暗降饱和）。静音统一到右上角。</div></div>
+    <div class="ev"><div class="et">v0.15 · 超武卡改概率</div><div class="en">从「满足条件就必出」改成进池竞争 + 保底</div><div class="ed">原来的写法是把超武卡直接 <code>push</code> 进三张里，绕过了后面那次加权抽 —— 达标之后每一级都有超武，三把武器都能进化时三张卡全是超武。改成进池（权重 1.4）、每级最多一张、连续三级没刷到保底；顺手修掉低血治疗卡无声吞掉第三张超武的问题。新增 <code>tests/cardpool.test.mjs</code>（13 条，纯 Node 抽源码跑）。</div></div>
     <div class="ev"><div class="et">v0.14.1 · 文档回填</div><div class="en">把四个地方的版本号对齐</div><div class="ed">README 写 v0.10、手册页头写 v0.7、笔记停在 v0.7，DEVLOG 却已经到 v0.14。新建版本主表 <code>docs/VERSIONS.md</code>，手册补到当前版，<code>index.html</code> 加 <code>app-version</code> meta，git 回填 13 个标签。</div></div>
   </div>
 
@@ -678,7 +679,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <tr><td><b>敌弹</b></td><td>黄色，和经验球撞色，无预警</td><td>洋红 + 白核 + 黑壳 + 拖尾，投掷手 0.45 秒抬手</td></tr>
       <tr><td><b>战斗曲</b></td><td>16 小节 / 28.7 秒</td><td>52 小节 / 93.1 秒，高潮出现两次共 43 秒</td></tr>
       <tr><td><b>结算</b></td><td>只有「再来一局」</td><td>再来一局 + 回到主菜单</td></tr>
-      <tr><td><b>代码规模</b></td><td>4,611 行 / 182 KB</td><td>6,071 行 / 267 KB</td></tr>
+      <tr><td><b>代码规模</b></td><td>4,611 行 / 182 KB</td><td>6,102 行 / 263 KB</td></tr>
     </tbody>
   </table>
   </div>
@@ -737,6 +738,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <tr><td><b>v0.13</b></td><td>10-25 03:30</td><td><code>5f5fe26</code></td><td>BGM 93 秒、地刺远程、激光改红、技能按钮右下（与 v0.14 同一提交）</td><td>—</td></tr>
       <tr><td><b>v0.14</b></td><td>10-25 03:54</td><td><code>5f5fe26</code></td><td>开始界面「一刀破开」、激光石蓝、静音右上</td><td>6,069 行 / 255 KB</td></tr>
       <tr><td><b>v0.14.1</b></td><td>10-26 01:50</td><td>标签 <code>v0.14.1</code></td><td>文档回填 + 版本标记（只动文档与 2 行 meta）</td><td>6,071 行 / 255 KB</td></tr>
+      <tr><td><b>v0.15</b></td><td>10-27 00:40</td><td>标签 <code>v0.15</code></td><td>超武卡从「必出」改成进池竞争 + 三级保底，每级最多一张</td><td>6,102 行 / 263 KB</td></tr>
     </tbody>
   </table>
   </div>
@@ -808,7 +810,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <tr><td>2</td><td><b>六把武器的强度差没实测</b></td><td>表里 Lv5 都在 130-180 区间，但那是理论 DPS，实战手感不同</td><td>你玩的时候留意哪把明显好用，我单独下调那一个的清怪系数</td></tr>
       <tr><td>3</td><td><b>真机帧率没测</b></td><td>无头浏览器是软件渲染，截图能看但不代表性能。第 10 波 150 只怪 + 卡通材质</td><td>你打开看右上角掉不掉帧，掉了我就降同屏上限</td></tr>
       <tr><td>4</td><td><b>Three.js 走 CDN</b></td><td>评审打开必须联网。断网或 CDN 被墙就是白屏</td><td>可以内联 three.min.js，文件从 267 KB 涨到约 420 KB，换零外网依赖</td></tr>
-      <tr><td>5</td><td><b>单文件已 6,071 行（脚本 4,926 行）</b></td><td>再加功能会难维护，也不好做数值模拟</td><td>建议下个阶段拆模块。顺带为将来上 Steam 的引擎迁移铺路</td></tr>
+      <tr><td>5</td><td><b>单文件已 6,102 行（脚本 4,957 行）</b></td><td>再加功能会难维护，也不好做数值模拟</td><td>建议下个阶段拆模块。顺带为将来上 Steam 的引擎迁移铺路</td></tr>
       <tr><td>6</td><td><b>超武强度没平衡</b></td><td>6 个进化形态，血月斩（范围 +60% + 吸血）可能明显强于其他</td><td>需要实测</td></tr>
       <tr><td>7</td><td><b>触屏没有任何视觉反馈</b></td><td>v0.12 把摇杆视觉层整层删了，现在拖动只有镜头在动，手指下面什么都没有</td><td>如果收到「不知道手指有没有被识别」的反馈，最小成本是在触点画一个 44px 半透明细环，不做底座和摇杆头</td></tr>
     </tbody>
@@ -855,7 +857,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   </div>
 
   <h2>文件结构</h2>
-  <pre>index.html                        游戏本体（单文件，6,071 行）
+  <pre>index.html                        游戏本体（单文件，6,102 行）
 docs/开发文档.html                 <span class="k">本文件</span>，六个标签页
 docs/VERSIONS.md                   <span class="k">版本主表</span>：提交号、规模、标签、发版流程、回滚
 docs/DEVLOG.md                     逐条开发日志（Markdown 原稿，根因优先）
@@ -872,6 +874,7 @@ docs/tools/build_numbers.py        重新生成分析表
 docs/tools/build_content.py        重新生成内容总表
 docs/tools/calc_curve.py           校验 DPS 曲线与武器参数自洽
 tests/*.test.mjs                   回归用例：方向 / 按钮 / 布局 / 开始界面 / 触屏 / 超武 / 构筑 / BOSS 阶段 / 音频
+tests/cardpool.test.mjs            <span class="k">卡池概率</span>：抽 index.html 源码跑，不用浏览器
 tests/run-balance.mjs              四智能体平衡压测（自起 8913 端口）
 tests/results/                     测试输出存档
 screenshots/                       各版本界面截图，按 vXXX- 前缀归档</pre>

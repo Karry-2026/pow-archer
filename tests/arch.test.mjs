@@ -81,15 +81,37 @@ const dist = await ev(`(function(){
 })()`);
 ck('卡池含流派卡', dist.arch > 0, dist);
 
-/* 超武前置：贴身 3 级 + 镰刀 5 级 → 出 EVO 卡 */
-const evoTest = await ev(`(function(){
+/* 超武前置：贴身 3 级 + 镰刀 5 级 → 卡池里有 EVO 卡
+   v0.15 起超武不再是「必出」，改成进池竞争 + 保底。所以这里分两条测：
+   ① 保底状态（evoDry ≥ 4）必定给一张，且只给一张；
+   ② 常态下多次抽样能抽到，出现率不能是 0 也不能是 100%。 */
+const evoPity = await ev(`(function(){
+  POW.hero.weapons = [{id:'scythe', lv:5, cd:0, tick:0}];
+  POW.hero.passives = {melee: 3}; POW.hero.evoId = null; POW.hero.evoDry = 4;
+  POW.refreshStats();
+  var n = 0, ids = {};
+  for(var i=0;i<200;i++){
+    POW.hero.evoDry = 4;
+    var cs = POW.buildChoices();
+    cs.forEach(function(c){ if(c.t === 'evo'){ n++; ids[c.id] = 1; } });
+  }
+  return {cards:n, ids:Object.keys(ids)};
+})()`);
+ck('保底状态每次都出超武', evoPity.cards === 200, evoPity);
+
+const evoRate = await ev(`(function(){
   POW.hero.weapons = [{id:'scythe', lv:5, cd:0, tick:0}];
   POW.hero.passives = {melee: 3}; POW.hero.evoId = null;
-  POW.refreshStats();
-  var cs = POW.buildChoices();
-  return cs.filter(function(x){ return x.t === 'evo'; }).map(function(x){ return x.id; });
+  var hit = 0, multi = 0, N = 1000;
+  for(var i=0;i<N;i++){
+    POW.hero.evoDry = 1;                 /* 非保底，纯看权重 */
+    var n = POW.buildChoices().filter(function(x){ return x.t === 'evo'; }).length;
+    if(n) hit++; if(n > 1) multi++;
+  }
+  return {rate: hit/N, multi: multi};
 })()`);
-ck('贴身3级可出超武卡', evoTest.length === 1 && evoTest[0] === 'scythe', evoTest);
+ck('超武常态出现率 20%-60%', evoRate.rate > 0.20 && evoRate.rate < 0.60, evoRate);
+ck('同一次升级最多一张超武', evoRate.multi === 0, evoRate);
 
 /* 反证：流派不够（只有 2 级）就不该出 */
 const evoNeg = await ev(`(function(){
@@ -103,6 +125,6 @@ ck('流派不足 3 级不出超武', evoNeg === 0, evoNeg);
 console.log('');
 console.log(`${pass} 通过 / ${fail} 失败 | JS 错误 ${errs.length}`);
 if(errs.length) console.log(errs.slice(0,3).join('\n'));
-fs.writeFileSync('tests/results/arch-smoke.json', JSON.stringify({swift, tank, setTest, dist, evoTest, errs}, null, 1));
+fs.writeFileSync('tests/results/arch-smoke.json', JSON.stringify({swift, tank, setTest, dist, evoPity, evoRate, errs}, null, 1));
 ws.close();
 process.exit(fail || errs.length ? 1 : 0);

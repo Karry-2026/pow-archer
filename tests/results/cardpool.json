@@ -1,0 +1,21 @@
+{
+ "notYet": 0,
+ "one": {
+  "rate": 0.373,
+  "slots": 0.373,
+  "avgFirst": 2.546,
+  "maxWait": 4
+ },
+ "two": 0.53525,
+ "three": {
+  "rate": 0.54275,
+  "per": {
+   "scythe": 3641,
+   "bomb": 3682,
+   "bow": 3532
+  }
+ },
+ "pity": 1,
+ "normal": 0.284,
+ "afterPick": 0
+}
