@@ -10,14 +10,14 @@
 
 | 项 | 值 |
 |---|---|
-| 代码版本 | **v0.15**（标签 `v0.15`） |
-| 文档版本 | **v0.15** |
+| 代码版本 | **v0.16**（标签 `v0.16`） |
+| 文档版本 | **v0.16** |
 | 分支 | `main`（唯一分支，无 feature 分支） |
-| 提交数 | 40（v0.15 发布时的提交数，之后只追加文档提交） |
-| 标签 | 14 个：v0.2 → v0.12、v0.14 → v0.15（v0.1 未入库，v0.13 与 v0.14 共用提交） |
+| 提交数 | 45（截至 v0.16）。这个数等于 `git rev-list --count v0.16`，别手抄历史 |
+| 标签 | 15 个：v0.2 → v0.12、v0.14 → v0.16（v0.1 未入库，v0.13 与 v0.14 共用提交） |
 | 在线地址 | https://karry-2026.github.io/pow-archer-play/ |
 | 参赛截止 | 2026-11-01 23:59（剩 5 天） |
-| 单文件规模 | 263 KB / 6,102 行 |
+| 单文件规模 | 264 KB / 6,107 行 |
 
 ---
 
@@ -54,6 +54,7 @@
 | v0.14 | 10-25 03:54 | `5f5fe26` | 开始界面「一刀破开」、激光改石蓝、静音统一右上 | 6,069 行 / 255 KB | `v0.14` |
 | v0.14.1 | 10-26 01:50 | 见标签 `v0.14.1` | 文档回填：当前状态、版本表、手册从 v0.7 补到 v0.14、`index.html` 加版本 meta | 6,071 行 / 255 KB | `v0.14.1` |
 | v0.15 | 10-27 00:40 | 见标签 `v0.15` | 超武卡从「必出」改成进池竞争（权重 1.4）+ 三级保底，每级最多一张；修掉治疗卡吞超武 | 6,102 行 / 263 KB | `v0.15` |
+| v0.16 | 10-27 00:55 | 见标签 `v0.16` | 数值审计：图鉴 BOSS 时长、配置表 sHit、手册曲线与 BOSS 公式全部对齐代码；新增 audit_numbers.py | 6,107 行 / 264 KB | `v0.16` |
 
 两处需要说清楚的偏差：
 
@@ -160,6 +161,8 @@ document.querySelector('meta[name=app-version]').content
    node tests/boss-phase.test.mjs    # BOSS 阶段
    node tests/audio-start.test.mjs   # 起播与循环
    node tests/cardpool.test.mjs      # 卡池概率（纯 Node，不用浏览器）
+   python docs/tools/audit_numbers.py # 表 / 代码 / 文档三方对账（需要 openpyxl）
+   python docs/tools/calc_curve.py    # EXPECTED_DPS 与武器参数自洽
    ```
    平衡另跑 `node tests/run-balance.mjs`，它自己起 8913 端口。
 3. **截图归档** `screenshots/vXXX-*.png`，用 `tests/title-shots.mjs` 那类脚本批量出图，不手截。
