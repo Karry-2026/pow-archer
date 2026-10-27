@@ -54,7 +54,7 @@ def num(text, key, default=None):
 
 
 W = {}
-for wid in ("bow", "laser", "scythe", "bomb", "shuriken", "spike"):
+for wid in ("bow", "laser", "blade", "bomb"):
     i = wdef_src.find(wid + ":{")
     j = wdef_src.find("  },", i)
     b = wdef_src[i:j if j > 0 else len(wdef_src)]
@@ -83,7 +83,7 @@ for eid in ("blob", "spiker", "chunk", "thrower"):
 
 ult = block("var ULT = {", "};")
 U = {}
-for wid in ("laser", "bow", "bomb", "shuriken", "scythe", "spike"):
+for wid in ("laser", "bow", "bomb", "blade"):
     m = re.search(wid + r":\s*\{[^}]*cd:([0-9.]+),\s*dur:([0-9.]+)", ult)
     U[wid] = dict(cd=float(m.group(1)), dur=float(m.group(2)))
 
@@ -181,8 +181,7 @@ check("波次曲线 10 行与公式一致", not bad, bad)
 # —— 超武必杀
 ult_ws = rows("超武必杀")
 bad = []
-NAME2ID = {"箭雨": "bow", "湮灭射线": "laser", "血月斩": "scythe",
-           "陨石雨": "bomb", "无限回旋": "shuriken", "荆棘领域": "spike"}
+NAME2ID = {"箭雨": "bow", "湮灭射线": "laser", "刃轮": "blade", "陨石雨": "bomb"}
 for r in ult_ws:
     uid = NAME2ID.get(str(r[0]))
     if not uid:

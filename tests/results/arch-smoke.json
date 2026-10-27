@@ -5,62 +5,56 @@
   ],
   "p": {
    "move": 1,
-   "shot": 1
+   "ranged": 1
   },
   "arch": {
    "melee": 1,
-   "throw": 1,
-   "shot": 1.2
+   "ranged": 1.2
   },
   "n": {
    "melee": 0,
-   "throw": 0,
-   "shot": 1
+   "ranged": 1
   }
  },
  "tank": {
   "w": [
-   "scythe:1"
+   "blade:1"
   ],
   "p": {
-   "hp": 1,
-   "melee": 1
+   "melee": 1,
+   "move": 1
   },
   "arch": {
    "melee": 1.2,
-   "throw": 1,
-   "shot": 1
+   "ranged": 1
   },
   "n": {
    "melee": 1,
-   "throw": 0,
-   "shot": 0
+   "ranged": 0
   }
  },
  "setTest": {
   "n": {
-   "melee": 2,
-   "throw": 0,
-   "shot": 0
+   "melee": 0,
+   "ranged": 2
   },
-  "mul": 1.56,
-  "range": 1.06
+  "mul": 1.56
  },
  "dist": {
-  "arch": 8,
-  "general": 12,
-  "wup": 18,
-  "wnew": 22,
+  "arch": 12,
+  "general": 13,
+  "wup": 24,
+  "wnew": 11,
   "other": 0
  },
  "evoPity": {
   "cards": 200,
   "ids": [
-   "scythe"
+   "blade"
   ]
  },
  "evoRate": {
-  "rate": 0.308,
+  "rate": 0.381,
   "multi": 0
  },
  "errs": []

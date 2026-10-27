@@ -64,17 +64,23 @@ const dirty = await ev(`(function(){
   h.lv = 12; h.xp = 30; h.xpNext = 101;
   h.evoId = 'bow'; h.evoDry = 7;       // 已进化 + 保底计数攒满
   h.ult.charge = 1; h.ult.active = 1;  // 必杀蓄满并在释放中
-  h.weapons = [{id:'bow',lv:5,cd:0,tick:0,plus:2},{id:'scythe',lv:5,cd:0,tick:0}];
+  h.weapons = [{id:'bow',lv:5,cd:0,tick:0,plus:2},{id:'blade',lv:5,cd:0,tick:0}];
   h.passives = {shot:3, melee:3, hp:5};
   POW.refreshStats();
   h.hp = 37;
   POW.spawnBoss();
-  POW.bullets.push({x:0,z:0,vx:1,vz:0,life:1});
-  POW.spikes.push({x:1,z:1,dmg:10,life:2,max:2});
-  POW.gems.push({x:1,z:1,v:2});
-  POW.chests.push({x:2,z:2,obj:{}});
+  /* 只造真实存在的对象：手搓的子弹/地刺缺字段，渲染层每帧会去读它们，
+     结果是「测试自己抛异常」，把真正的残留检查淹没掉。 */
+  POW.spawnGem(4, 4, 2);
+  /* obj 必须带 rotation/position：updateChests 每帧会转它，给个空对象会抛 TypeError */
+  /* 宝箱替身要把 updateChests 每帧会碰到的东西全部给齐：
+     c.t / c.halo.rotation.z / c.obj.scale.setScalar / c.obj.position.y。
+     少一个就抛 TypeError，然后把「残留检查」淹在报错里。 */
+  POW.chests.push({x:2, z:2, t:0,
+    halo:{rotation:{z:0}},
+    obj:{rotation:{y:0}, scale:{setScalar:function(){}}, position:{y:0, set:function(){}}, visible:true}});
   return {rerolls:S.rerolls, evoDry:h.evoDry, evoId:h.evoId, hp:h.hp, lv:h.lv,
-          arr:[POW.bullets.length, POW.spikes.length, POW.gems.length, POW.chests.length],
+          arr:[POW.bullets.length, POW.gems.length, POW.chests.length],
           boss: !!POW.boss};
 })()`);
 ck('脏状态准备成功', dirty && dirty.rerolls === 0 && dirty.evoDry === 7 && dirty.boss === true, dirty);
@@ -112,17 +118,17 @@ ck('等级与经验回到开局', after.lv === 1 && after.xp === 0 && after.xpNe
 ck('血量按新配装重算', after.hp === after.maxhp && after.maxhp === 100, {hp: after.hp, maxhp: after.maxhp});
 ck('武器只剩起手那把、突破层数清空',
    after.weapons.length === 1 && after.weapons[0] === 'bow:1', after.weapons);
-ck('被动只剩起手两个', JSON.stringify(after.passives) === JSON.stringify({move:1, shot:1}), after.passives);
-ck('弹道 / 地刺 / 经验球 / 宝箱全部清空',
-   after.bul.concat([after.spikes, after.gems, after.chests]).every(function(n){ return n === 0; }),
-   {bul: after.bul, spikes: after.spikes, gems: after.gems, chests: after.chests});
+ck('被动只剩起手两个', JSON.stringify(after.passives) === JSON.stringify({move:1, ranged:1}), after.passives);
+ck('弹道 / 经验球 / 宝箱全部清空',
+   after.bul.concat([after.gems, after.chests]).every(function(n){ return n === 0; }),
+   {bul: after.bul, gems: after.gems, chests: after.chests});
 ck('BOSS 已移除', after.boss === false, {boss: after.boss});
 ck('震屏归零', after.shake === 0, {shake: after.shake});
 
 /* ── 换职业再开一局：模型与配装都要跟着换 ── */
 const swap = await ev(`(function(){
   var idx = -1, cards = document.querySelectorAll('#heroes .pick');
-  for(var i=0;i<cards.length;i++){ if(cards[i].textContent.indexOf('回锋') >= 0){ idx = i; break; } }
+  for(var i=0;i<cards.length;i++){ if(cards[i].textContent.indexOf('炸弹手') >= 0){ idx = i; break; } }
   if(idx < 0) return 'no-card';
   cards[idx].click();
   POW.start();
@@ -132,8 +138,8 @@ const swap = await ev(`(function(){
           weapon: h.weapons[0].id, passives: h.passives, speed: +h.stat.spd.toFixed(2),
           modelKids: h.obj ? h.obj.children.length : -1};
 })()`);
-ck('换职业后起手武器跟着换', swap && swap.weapon === 'shuriken', swap);
-ck('换职业后被动跟着换', swap && swap.passives && swap.passives.throw === 1, swap && swap.passives);
+ck('换职业后起手武器跟着换', swap && swap.weapon === 'bomb', swap);
+ck('换职业后被动跟着换', swap && swap.passives && swap.passives.ranged === 1, swap && swap.passives);
 ck('换职业后模型重建', swap && swap.modelKids === 1, {kids: swap && swap.modelKids});
 
 console.log('');

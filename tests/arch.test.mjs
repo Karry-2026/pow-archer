@@ -33,32 +33,34 @@ const ck = (name, ok, detail) => { console.log(ok ? 'PASS' : 'FAIL', name, detai
 
 ck('POW 就绪', await ev('typeof window.POW') === 'object');
 
-/* 疾风：射击线起手 */
+/* 散射：远程线起手 */
 const swift = await ev(`(function(){
   POW.start();
   return {w: POW.hero.weapons.map(function(x){return x.id+':'+x.lv;}), p: POW.hero.passives,
           arch: POW.hero.stat.arch, n: POW.hero.stat.archN};
 })()`);
-ck('疾风起手 = 弓 + 射击1', swift.w[0] === 'bow:1' && swift.p.shot === 1, swift);
+ck('散射起手 = 弓 + 远程1', swift.w[0] === 'bow:1' && swift.p.ranged === 1, swift);
 
 /* 铁壁：贴身线起手 */
 const tank = await ev(`(function(){
   document.getElementById('scr-title').classList.remove('hide');
-  document.querySelectorAll('#heroes .pick')[1].click();
+  document.querySelectorAll('#heroes .pick')[2].click();
   POW.start();
   return {w: POW.hero.weapons.map(function(x){return x.id+':'+x.lv;}), p: POW.hero.passives,
           arch: POW.hero.stat.arch, n: POW.hero.stat.archN};
 })()`);
-ck('铁壁起手 = 镰刀 + 贴身1', tank.w[0] === 'scythe:1' && tank.p.melee === 1, tank);
+ck('连刃起手 = 连刃 + 近身1', tank.w[0] === 'blade:1' && tank.p.melee === 1, tank);
 
-/* 套装：给铁壁补一把地刺，贴身倍率应该 = (1+0.2)*1.3 = 1.56 */
+/* 套装：切到散射（远程），再补一把激光，远程倍率应该 = (1+0.2)*1.3 = 1.56 */
 const setTest = await ev(`(function(){
-  POW.hero.weapons.push({id:'spike', lv:1, cd:0, tick:0});
+  document.getElementById('scr-title').classList.remove('hide');
+  document.querySelectorAll('#heroes .pick')[0].click();
+  POW.start();
+  POW.hero.weapons.push({id:'laser', lv:1, cd:0, tick:0});
   POW.refreshStats();
-  return {n: POW.hero.stat.archN, mul: +POW.hero.stat.arch.melee.toFixed(3),
-          range: +POW.hero.stat.range.toFixed(3)};
+  return {n: POW.hero.stat.archN, mul: +POW.hero.stat.arch.ranged.toFixed(3)};
 })()`);
-ck('双持贴身 → 套装 ×1.30', Math.abs(setTest.mul - 1.56) < 0.001 && setTest.n.melee === 2, setTest);
+ck('双持远程 → 套装 ×1.30', Math.abs(setTest.mul - 1.56) < 0.001 && setTest.n.ranged === 2, setTest);
 
 /* 卡池：连升 20 级，统计流派卡占比 */
 const dist = await ev(`(function(){
@@ -86,8 +88,8 @@ ck('卡池含流派卡', dist.arch > 0, dist);
    ① 保底状态（evoDry ≥ 4）必定给一张，且只给一张；
    ② 常态下多次抽样能抽到，出现率不能是 0 也不能是 100%。 */
 const evoPity = await ev(`(function(){
-  POW.hero.weapons = [{id:'scythe', lv:5, cd:0, tick:0}];
-  POW.hero.passives = {melee: 3}; POW.hero.evoId = null; POW.hero.evoDry = 4;
+  POW.hero.weapons = [{id:'blade', lv:5, cd:0, tick:0}];
+  POW.hero.passives = {melee: 2}; POW.hero.evoId = null; POW.hero.evoDry = 4;
   POW.refreshStats();
   var n = 0, ids = {};
   for(var i=0;i<200;i++){
@@ -100,8 +102,8 @@ const evoPity = await ev(`(function(){
 ck('保底状态每次都出超武', evoPity.cards === 200, evoPity);
 
 const evoRate = await ev(`(function(){
-  POW.hero.weapons = [{id:'scythe', lv:5, cd:0, tick:0}];
-  POW.hero.passives = {melee: 3}; POW.hero.evoId = null;
+  POW.hero.weapons = [{id:'blade', lv:5, cd:0, tick:0}];
+  POW.hero.passives = {melee: 2}; POW.hero.evoId = null;
   var hit = 0, multi = 0, N = 1000;
   for(var i=0;i<N;i++){
     POW.hero.evoDry = 1;                 /* 非保底，纯看权重 */

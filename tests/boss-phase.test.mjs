@@ -53,7 +53,10 @@ const info = await ev(`(function(){
           dps: Math.round(b.dpsAtSpawn)};
 })()`);
 ck('第5波 BOSS 生成', info && info.kind === 'maw', info);
-ck('血量按 25 秒有效输出（32 减 7）', info.dyn === 25 && Math.abs(info.hp - info.dps*25) < info.dps, info);
+/* 血量有 260 的下限：弱配装（DPS 十几）按 25 秒算是两百多，会被托底。
+   所以判据是「要么等于 DPS×25，要么正好是下限」，不是单纯比大小。 */
+const wantHp = Math.max(260, Math.round(info.dps * 25));
+ck('血量按 25 秒有效输出（32 减 7）', info.dyn === 25 && info.hp === wantHp, {hp: info.hp, want: wantHp});
 
 /* 等升场结束：不能死等墙钟，无头浏览器是软渲染，帧率低时游戏时间走得慢。
    按状态轮询才可靠。 */

@@ -91,14 +91,14 @@ const SIZES = [
     /* 4) 选角色 + 改密度 + 点开始，整条链路要通 */
     const flow = await ev(`(function(){
       var p = document.querySelectorAll('#scr-title .pick');
-      if(p.length !== 6) return 'cards=' + p.length;
+      if(p.length !== 4) return 'cards=' + p.length;
       p[1].click();
       var rb = document.querySelectorAll('#scr-title .rate button');
       if(rb.length !== 4) return 'rates=' + rb.length;
       rb[3].click();
       var on = document.querySelector('#scr-title .pick.on');
       var ron = document.querySelector('#scr-title .rate button.on');
-      var a = on ? on.textContent.indexOf('铁壁') >= 0 : false;
+      var a = on ? on.textContent.indexOf('激光手') >= 0 : false;
       var b = ron ? ron.textContent.indexOf('地狱') >= 0 : false;
       return JSON.stringify({hero: a, rate: b});
     })()`);

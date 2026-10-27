@@ -40,7 +40,7 @@ await sleep(400);
 const ringOff = await ev("document.getElementById('ultbox').classList.contains('off')");
 ck('无超武时蓄力环隐藏', ringOff);
 
-const IDS = ['laser','bow','bomb','shuriken','scythe','spike'];
+const IDS = ['laser','bow','bomb','blade'];
 for(const uid of IDS){
   const before = await ev(`(function(){
     POW.hero.evoId = '${uid}';
