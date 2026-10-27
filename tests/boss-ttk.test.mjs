@@ -7,8 +7,8 @@
  * 用法：node tests/boss-ttk.test.mjs   （需 http://127.0.0.1:8921 + 调试端口 9971）
  */
 import fs from 'fs';
-const PORT = 9971;
-const PAGE = 'http://127.0.0.1:8921/index.html';
+const PORT = Number(process.env.CDP_PORT || 9971);
+const PAGE = process.env.APP_URL || 'http://127.0.0.1:8921/index.html';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const list = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json();

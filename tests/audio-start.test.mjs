@@ -17,8 +17,8 @@
  */
 import fs from 'fs';
 
-const PORT = 9961;
-const PAGE = 'http://127.0.0.1:8915/index.html';
+const PORT = Number(process.env.CDP_PORT || 9961);
+const PAGE = process.env.APP_URL || 'http://127.0.0.1:8915/index.html';
 const CAPTURE_SEC = 52;      // 菜单 16 小节 ≈ 46.8 秒（v0.12 加长），留 5 秒余量盖住循环点
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));

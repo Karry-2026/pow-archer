@@ -1,0 +1,61 @@
+{
+ "dirty": {
+  "rerolls": 0,
+  "evoDry": 7,
+  "evoId": "bow",
+  "hp": 37,
+  "lv": 12,
+  "arr": [
+   1,
+   1,
+   1,
+   1
+  ],
+  "boss": true
+ },
+ "after": {
+  "rerolls": 3,
+  "evoDry": 0,
+  "evoId": null,
+  "wave": 1,
+  "kills": 0,
+  "t": 0.52,
+  "waveT": 0.52,
+  "hp": 100,
+  "maxhp": 100,
+  "lv": 1,
+  "xp": 0,
+  "xpNext": 9,
+  "weapons": [
+   "bow:1"
+  ],
+  "passives": {
+   "move": 1,
+   "shot": 1
+  },
+  "ultCharge": 0,
+  "ultActive": 0,
+  "bul": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "spikes": 0,
+  "gems": 0,
+  "chests": 0,
+  "boss": false,
+  "shake": 0
+ },
+ "swap": {
+  "hero": "回锋",
+  "weapon": "shuriken",
+  "passives": {
+   "move": 1,
+   "throw": 1
+  },
+  "speed": 10.6,
+  "modelKids": 1
+ },
+ "errs": []
+}

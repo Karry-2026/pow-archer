@@ -1,7 +1,7 @@
 /* 流派系统冒烟测试：起手分流、卡池权重、套装、超武前置 */
 import fs from 'fs';
-const PORT = 9971;
-const PAGE = 'http://127.0.0.1:8921/index.html';
+const PORT = Number(process.env.CDP_PORT || 9971);
+const PAGE = process.env.APP_URL || 'http://127.0.0.1:8921/index.html';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const list = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json();

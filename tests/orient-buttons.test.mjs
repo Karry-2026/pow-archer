@@ -73,12 +73,16 @@ skipCalls = 0;
 if(els.rotate.onclick) els.rotate.onclick({ target: { tagName: 'BUTTON' } });
 check('点遮罩内按钮 → 不重复触发', skipCalls === 0, '实际 ' + skipCalls + ' 次');
 
-console.log('\n合计 ' + pass + ' 通过 / ' + fail + ' 失败');
+/* 不在这里提前打「合计」：原来打在静态检查之前，数字少算后面三条断言，
+   出现过「合计 9/0」但最终 11/1 的迷惑输出。汇总放最后。 */
 
 /* 静态检查：启动区必须真的调用了 bindOrientUI */
-const bootIdx = html.indexOf('window.POW = {');
-const before = html.slice(bootIdx - 400, bootIdx);
-const bootOk = /bindOrientUI\(\);\s*\n\s*checkOrient\(\);/.test(before);
+/* 断言「定义之后、顶层调用过」，不绑定具体行距。
+   旧写法取 window.POW 前 400 字符，再要求 bindOrientUI(); 紧跟 checkOrient();
+   v0.17 在两者之间插入 bindUltTap() 后行距拉开 40 多行，断言随即误报。 */
+const defIdx = html.indexOf('function bindOrientUI(');
+const callIdx = html.lastIndexOf('bindOrientUI();');
+const bootOk = defIdx > 0 && callIdx > defIdx;
 check('启动区调用了 bindOrientUI', bootOk, bootOk ? '' : '启动区没调用');
 
 /* 静态检查：HTML 里按钮有内联兜底 */

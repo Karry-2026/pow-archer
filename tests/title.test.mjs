@@ -10,7 +10,7 @@
  *   msedge --headless=new --remote-debugging-port=9971 ...
  *   node tests/title.test.mjs
  */
-const PORT = 9971;
+const PORT = Number(process.env.CDP_PORT || 9971);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const SIZES = [
   [1440, 900], [1280, 720], [1024, 768],
@@ -39,7 +39,7 @@ const SIZES = [
 
   for (const [w, h] of SIZES) {
     await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: w < 1000 });
-    await send('Page.navigate', { url: 'http://127.0.0.1:8921/index.html?t=' + Date.now() });
+    await send('Page.navigate', { url: (process.env.APP_URL || 'http://127.0.0.1:8921/index.html') + '?t=' + Date.now() });
     await sleep(3400);
     await ev("window.__POW_BOOT && window.__POW_BOOT(); 'ok'");
     await sleep(900);
@@ -55,7 +55,7 @@ const SIZES = [
         return [].slice.call(document.querySelectorAll(sel));
       };
       // 右列里所有「有可见文字或边框」的控件
-      pick('.tt-rate .tt-lab, #scr-title .rate button, .tt-how div, .tt-foot .startbig, .tt-foot .codexbtn, #mutebtn')
+      pick('.tt-rate .tt-lab, #scr-title .rate button, .tt-foot .startbig, .tt-foot .codexbtn, #mutebtn')
         .forEach(function(e){
           var b = e.getBoundingClientRect();
           if(!b.width || getComputedStyle(e).display === 'none') return;

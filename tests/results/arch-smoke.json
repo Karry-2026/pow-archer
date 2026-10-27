@@ -47,10 +47,10 @@
   "range": 1.06
  },
  "dist": {
-  "arch": 10,
-  "general": 13,
-  "wup": 19,
-  "wnew": 18,
+  "arch": 8,
+  "general": 12,
+  "wup": 18,
+  "wnew": 22,
   "other": 0
  },
  "evoPity": {
@@ -60,7 +60,7 @@
   ]
  },
  "evoRate": {
-  "rate": 0.265,
+  "rate": 0.308,
   "multi": 0
  },
  "errs": []

@@ -13,7 +13,7 @@
  *   msedge --headless=new --remote-debugging-port=9971 ...
  *   node tests/touch.test.mjs
  */
-const PORT = 9971;
+const PORT = Number(process.env.CDP_PORT || 9971);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const list = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json();
 const page = list.find(t => t.type === 'page');
@@ -38,9 +38,17 @@ const touch = (type, x, y) => send('Input.dispatchTouchEvent', {
 await send('Emulation.setDeviceMetricsOverride', {width: 844, height: 390, deviceScaleFactor: 2, mobile: true});
 await send('Emulation.setTouchEmulationEnabled', {enabled: true, maxTouchPoints: 5});
 await send('Runtime.enable'); await send('Page.enable');
-await send('Page.navigate', {url: 'http://127.0.0.1:8921/index.html?t=' + Date.now()});
+await send('Page.navigate', {url: (process.env.APP_URL || 'http://127.0.0.1:8921/index.html') + '?t=' + Date.now()});
 await sleep(4200);
 
+/* v0.17 起进游戏先过一道加载页。#boot 铺满全屏并且自己带 onclick，
+   不先关掉它，合成的 touch 事件全被遮罩吃掉，位移测出来恒为 0。 */
+await ev("window.__POW_BOOT && window.__POW_BOOT(); 'ok'");
+for(let i = 0; i < 30; i++){
+  const gone = await ev("(function(){var b=document.getElementById('boot');return !b||getComputedStyle(b).display==='none';})()");
+  if(gone) break;
+  await sleep(120);
+}
 console.log('摇杆 DOM 是否已移除:', await ev("document.getElementById('stick') === null"));
 await ev("POW.start(); POW.S.spawnMul = 0; POW.hero.xpNext = 9e9; 'ok'");
 await sleep(400);

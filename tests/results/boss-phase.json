@@ -10,7 +10,7 @@
  },
  "ph2": {
   "phase2": true,
-  "invuln": 4.4,
+  "invuln": 4.38,
   "shield": true,
   "minions": 6
  },
@@ -25,7 +25,7 @@
  "ph3": {
   "phase3": true,
   "rage": true,
-  "invuln": 2.5
+  "invuln": 2.38
  },
  "errs": []
 }

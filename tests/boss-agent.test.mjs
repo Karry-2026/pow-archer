@@ -14,12 +14,12 @@
  */
 import fs from 'fs';
 
-const PORT = Number(process.argv[2] || 9941);
+const PORT = Number(process.env.CDP_PORT || process.argv[2] || 9941);
 const STRATEGY = process.argv[3] || 'balanced';
 const WAVE = Number(process.argv[4] || 5);
 const TARGET_LV = Number(process.argv[5] || 14);
 const OUT = process.argv[6] || `boss-${STRATEGY}-w${WAVE}.json`;
-const PAGE = process.argv[7] || 'http://127.0.0.1:8913/index.html';
+const PAGE = process.env.APP_URL || process.argv[7] || 'http://127.0.0.1:8913/index.html';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 

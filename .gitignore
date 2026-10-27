@@ -18,3 +18,11 @@ dist/
 _edge*/
 
 _bgm_out/
+
+# 全量测试的临时产物（测试副本 / 各集群报告 / 运行日志）
+_probe/
+_reports/
+_runall.sh
+_run_all.log
+_t_*
+
