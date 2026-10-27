@@ -41,6 +41,8 @@ const SIZES = [
     await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: w < 1000 });
     await send('Page.navigate', { url: 'http://127.0.0.1:8921/index.html?t=' + Date.now() });
     await sleep(3400);
+    await ev("window.__POW_BOOT && window.__POW_BOOT(); 'ok'");
+    await sleep(900);
     console.log(`\n[${w}x${h}]`);
 
     /* 1) 切线：纸面右边缘 = 52% + 11.5vh - 30（向下走时右移）。
@@ -89,7 +91,7 @@ const SIZES = [
     /* 4) 选角色 + 改密度 + 点开始，整条链路要通 */
     const flow = await ev(`(function(){
       var p = document.querySelectorAll('#scr-title .pick');
-      if(p.length !== 2) return 'cards=' + p.length;
+      if(p.length !== 6) return 'cards=' + p.length;
       p[1].click();
       var rb = document.querySelectorAll('#scr-title .rate button');
       if(rb.length !== 4) return 'rates=' + rb.length;
@@ -101,7 +103,7 @@ const SIZES = [
       return JSON.stringify({hero: a, rate: b});
     })()`);
     const f = JSON.parse(flow);
-    ok(f.hero && f.rate, '选中第二个射手 / 第四个密度档位');
+    ok(f.hero && f.rate, '选中第二个职业 / 第四个密度档位');
 
     await ev("document.getElementById('startbtn').click(); 'ok'");
     await sleep(700);

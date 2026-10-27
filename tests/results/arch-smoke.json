@@ -49,12 +49,19 @@
  "dist": {
   "arch": 10,
   "general": 13,
-  "wup": 21,
-  "wnew": 16,
+  "wup": 19,
+  "wnew": 18,
   "other": 0
  },
- "evoTest": [
-  "scythe"
- ],
+ "evoPity": {
+  "cards": 200,
+  "ids": [
+   "scythe"
+  ]
+ },
+ "evoRate": {
+  "rate": 0.265,
+  "multi": 0
+ },
  "errs": []
 }
