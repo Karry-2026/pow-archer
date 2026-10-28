@@ -10,13 +10,13 @@
  },
  "ph2": {
   "phase2": true,
-  "invuln": 4.5,
+  "invuln": 4.38,
   "shield": true,
   "minions": 6
  },
  "dmgTest": {
-  "before": 214,
-  "after": 214
+  "before": 155,
+  "after": 155
  },
  "afterInv": {
   "invuln": -0.02,
@@ -25,7 +25,7 @@
  "ph3": {
   "phase3": true,
   "rage": true,
-  "invuln": 2.48
+  "invuln": 2.38
  },
  "errs": []
 }

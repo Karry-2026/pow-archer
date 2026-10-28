@@ -1,21 +1,21 @@
 {
  "notYet": 0,
  "one": {
-  "rate": 0.39315,
-  "slots": 0.39315,
-  "avgFirst": 2.4305,
+  "rate": 0.3863,
+  "slots": 0.3863,
+  "avgFirst": 2.475,
   "maxWait": 4
  },
- "two": 0.55705,
+ "two": 0.5587,
  "three": {
-  "rate": 0.69215,
+  "rate": 0.69905,
   "per": {
-   "bomb": 4613,
-   "laser": 4618,
-   "bow": 4612
+   "bomb": 4654,
+   "bow": 4648,
+   "laser": 4679
   }
  },
  "pity": 1,
- "normal": 0.304,
+ "normal": 0.288,
  "afterPick": 0
 }

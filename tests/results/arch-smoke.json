@@ -42,9 +42,9 @@
  },
  "dist": {
   "arch": 7,
-  "general": 20,
+  "general": 21,
   "wup": 23,
-  "wnew": 10,
+  "wnew": 9,
   "other": 0
  },
  "evoPity": {
@@ -54,7 +54,7 @@
   ]
  },
  "evoRate": {
-  "rate": 0.363,
+  "rate": 0.369,
   "multi": 0
  },
  "errs": []
