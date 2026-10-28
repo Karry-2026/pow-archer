@@ -120,7 +120,7 @@ PARAMS = [
     ("目标BOSS TTK-第5波", 12, 32, "秒", "目标", "按实时 DPS 派生血量，含 7 秒无敌窗口"),
     ("目标BOSS TTK-第10波", 18, 45, "秒", "目标", "按实时 DPS 派生血量，含 7 秒无敌窗口"),
     ("小怪血量基数", 15, 7, "点", "敌人", "ETYPES.blob.hp：开局 TTK 从 1.17 秒降到 0.54"),
-    ("血量成长率R", 1.0, 1.75, "倍/波", "敌人", "从查表线性改成 base×R^(波-1) 指数"),
+    ("血量成长率R", 1.75, 1.40, "倍/波", "敌人", "v0.19 从 1.75 降到 1.40：指数和伤害成长脱钩，第 10 波曾要 26 发一只"),
     ("敌人伤害基数", 10, 14, "点", "敌人", "ETYPES.blob.dmg：可挨次数从 10 下收到 7 下"),
     ("精英血量倍率", 5.5, 8.0, "倍", "敌人", "spawnEnemy 的 elite hpMul"),
     ("精英伤害倍率", 1.55, 1.7, "倍", "敌人", "elite 的 dmgMul"),
@@ -295,14 +295,15 @@ for i in range(10):
     put(ws_wa, r, 2, f"={REF['R']}^(A{r}-1)", fmt="0.00", align=RIGHT, fill=XL_CALC, bold=True)
     put(ws_wa, r, 3, CUR_HP[i], fmt="0.00", align=RIGHT, fill=XL_OLD)
     put(ws_wa, r, 4, f"=1+0.10*(A{r}-1)", fmt="0.00", align=RIGHT, fill=XL_CALC)
-    put(ws_wa, r, 5, f"=1+0.09*(A{r}-1)", fmt="0.00", align=RIGHT, fill=XL_CALC)
+    put(ws_wa, r, 5, f"=1+0.05*(A{r}-1)", fmt="0.00", align=RIGHT, fill=XL_CALC)
     put(ws_wa, r, 6, f"={REF['hp_base_e']}*B{r}", fmt="#,##0.0", align=RIGHT, fill=XL_CALC)
     put(ws_wa, r, 7, f"=15*C{r}", fmt="#,##0.0", align=RIGHT, fill=XL_OLD)
     put(ws_wa, r, 8, INTENT[i], align=LEFT)
     r += 1
 note_bar(ws_wa, r + 1, 8,
-         "修正前是查表的线性曲线（×3 到顶），修正后是 1.75 的指数。第 10 波 EHP 从 45 涨到 1071——"
-         "这个涨幅不是为了变难，是为了追上玩家那边 ×138 的 DPS 增长（13 → 1797）。")
+         "修正前是查表的线性曲线（×3 到顶），修正后改指数。v0.19 把底数从 1.75 降到 1.40："
+         "1.75 时第 10 波 EHP 是 1071，玩家单发伤害同期只涨 6.9 倍，杂兵要 26 发才死；"
+         "1.40 时是 145，一只要 3.5 发，压力改由密度和高血量单位承担。")
 
 # ══════════════════════════════════════════════════════════════
 # 玩家成长

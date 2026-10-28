@@ -25,7 +25,7 @@ w_end = src.find("var WKEYS = ['bow'")
 wdef_src = src[w_start:w_end]
 
 WEAPONS = {}
-for wid in ("bow", "laser", "scythe", "bomb", "shuriken", "spike"):
+for wid in ("bow", "laser", "blade", "bomb"):
     i = wdef_src.find(wid + ":{")
     j = wdef_src.find("  },", i)
     if j < 0:
@@ -39,33 +39,32 @@ for wid in ("bow", "laser", "scythe", "bomb", "shuriken", "spike"):
         "coef": grab_scalar(block, "coef", 1.0),
         "sHit": grab_scalar(block, "sHit", 1.0),
         "hitMul": grab_scalar(block, "hitMul", 1.0),
-        "arch": arch.group(1) if arch else "shot",
+        "arch": arch.group(1) if arch else "ranged",
     }
 
 # ── 提取乘区系数 ──
 ARCH_DMG = grab_scalar(src, "ARCH_DMG", 0.20)
+HASTE_STEP = float((re.search(r"var HASTE_STEP = ([0-9.]+);", src) or [0, 0.08])[1])
 SET_BONUS = grab_scalar(src, "SET_BONUS", 1.30)
 CRIT_BASE = grab_scalar(src, "crit:0.06", 0.06)
-m = re.search(r"hero\.stat\.crit\s*=\s*[^;]+\*\s*([0-9.]+)", src)
-CRIT_PER = float(m.group(1)) if m else 0.04
+CRIT_BASE = 0.06
 m = re.search(r"if\(isCrit\) dmg \*= ([0-9.]+);", src)
 CRIT_MUL = float(m.group(1)) if m else 2.0
-m = re.search(r"hero\.stat\.as\s*=\s*[^;]+\*\s*([0-9.]+)", src)
-AS_PER = float(m.group(1)) if m else 0.05
+AS_PER = HASTE_STEP
 
 # ── 标准配装假设：每波武器组合 + 各流派精通等级 ──
 # 与 docs/爆裂弓箭手_数值分析表.xlsx「玩家成长」一致。
 BUILD = [
-    (1,  [("bow", 1)],                          {"shot": 0, "melee": 0, "throw": 0}),
-    (2,  [("bow", 2)],                          {"shot": 0, "melee": 0, "throw": 0}),
-    (3,  [("bow", 3), ("laser", 1)],            {"shot": 1, "melee": 0, "throw": 0}),
-    (4,  [("bow", 4), ("laser", 2)],            {"shot": 2, "melee": 0, "throw": 0}),
-    (5,  [("bow", 5), ("laser", 3), ("scythe", 2)], {"shot": 2, "melee": 1, "throw": 0}),
-    (6,  [("bow", 5), ("laser", 4), ("scythe", 3), ("bomb", 2)], {"shot": 3, "melee": 2, "throw": 1}),
-    (7,  [("bow", 5), ("laser", 4), ("scythe", 3), ("bomb", 3)], {"shot": 3, "melee": 2, "throw": 2}),
-    (8,  [("bow", 5), ("laser", 5), ("scythe", 4), ("bomb", 3)], {"shot": 4, "melee": 3, "throw": 3}),
-    (9,  [("bow", 5), ("laser", 5), ("scythe", 5), ("bomb", 4)], {"shot": 4, "melee": 4, "throw": 4}),
-    (10, [("bow", 5), ("laser", 5), ("scythe", 5), ("bomb", 5)], {"shot": 5, "melee": 5, "throw": 5}),
+    (1,  [("bow", 1)],                                  {"ranged": 0, "melee": 0, "haste": 0}),
+    (2,  [("bow", 2)],                                  {"ranged": 0, "melee": 0, "haste": 0}),
+    (3,  [("bow", 3), ("laser", 1)],                    {"ranged": 1, "melee": 0, "haste": 0}),
+    (4,  [("bow", 4), ("laser", 2)],                    {"ranged": 2, "melee": 0, "haste": 0}),
+    (5,  [("bow", 5), ("laser", 3)],                    {"ranged": 2, "melee": 0, "haste": 1}),
+    (6,  [("bow", 5), ("laser", 4), ("bomb", 2)],       {"ranged": 3, "melee": 0, "haste": 1}),
+    (7,  [("bow", 5), ("laser", 4), ("bomb", 3), ("blade", 2)], {"ranged": 3, "melee": 1, "haste": 2}),
+    (8,  [("bow", 5), ("laser", 5), ("bomb", 3), ("blade", 3)], {"ranged": 4, "melee": 1, "haste": 2}),
+    (9,  [("bow", 5), ("laser", 5), ("bomb", 4), ("blade", 4)], {"ranged": 4, "melee": 2, "haste": 3}),
+    (10, [("bow", 5), ("laser", 5), ("bomb", 5), ("blade", 5)], {"ranged": 5, "melee": 2, "haste": 3}),
 ]
 
 
@@ -84,14 +83,15 @@ def dps_of(loadout, passive, single=False):
             mul *= SET_BONUS
         coef = d["sHit"] if single else d["coef"]
         total += d["dmg"][lv - 1] * d["cnt"][lv - 1] / d["cd"][lv - 1] * coef * d["hitMul"] * mul
-    crit = 1 + (CRIT_BASE + passive.get("throw", 0) * CRIT_PER) * (CRIT_MUL - 1)
-    return total * crit
+    crit = 1 + CRIT_BASE * (CRIT_MUL - 1)
+    asMul = 1 + passive.get("haste", 0) * AS_PER
+    return total * crit * asMul
 
 
 print("提取到的参数：")
-print(f"  流派精通/级 {ARCH_DMG}  套装 {SET_BONUS}  暴击 {CRIT_BASE}+{CRIT_PER}/级×{CRIT_MUL}")
+print(f"  流派精通/级 {ARCH_DMG}  套装 {SET_BONUS}  暴击 {CRIT_BASE}×{CRIT_MUL}  急速/级 {AS_PER}")
 print("  武器 Lv5 清怪DPS：")
-for wid in ("bow", "laser", "scythe", "bomb", "shuriken", "spike"):
+for wid in ("bow", "laser", "blade", "bomb"):
     d = WEAPONS[wid]
     v = d["dmg"][4] * d["cnt"][4] / d["cd"][4] * d["coef"] * d["hitMul"]
     print(f"    {wid:9s} {v:7.1f}")

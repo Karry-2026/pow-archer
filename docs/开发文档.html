@@ -242,11 +242,11 @@ footer{
 
 <header>
   <div class="hd-in">
-    <div class="hd-kicker">PROJECT DOCUMENT · 2026-10-28 · v0.18</div>
+    <div class="hd-kicker">PROJECT DOCUMENT · 2026-10-29 · v0.19</div>
     <h1>爆裂弓箭手</h1>
     <div class="hd-sub">2.5D 俯视割草 · 美漫风格 · 单文件网页游戏</div>
     <div class="hd-meta">
-      <span class="chip">版本 <b>v0.18</b></span>
+      <span class="chip">版本 <b>v0.19</b></span>
       <span class="chip">类型 <b>网页应用</b></span>
       <span class="chip">引擎 <b>Three.js</b></span>
       <span class="chip">仓库 <b>私有</b></span>
@@ -256,10 +256,10 @@ footer{
 </header>
 
 <div class="stats">
-  <div class="stat c1"><div class="k">当前版本</div><div class="v">v0.18</div><div class="n">可玩 · 已上线 · 48 次提交</div></div>
+  <div class="stat c1"><div class="k">当前版本</div><div class="v">v0.19</div><div class="n">可玩 · 已上线 · 49 次提交</div></div>
   <div class="stat c2"><div class="k">武器 / 被动</div><div class="v">6 / 6</div><div class="n">3 流派精通 + 3 通用，6 个超武</div></div>
   <div class="stat c3"><div class="k">敌人 / BOSS</div><div class="v">4 / 2</div><div class="n">第 5 波、第 10 波</div></div>
-  <div class="stat c4"><div class="k">单文件体积</div><div class="v">264 KB</div><div class="n">6,230 行 · 零外部素材</div></div>
+  <div class="stat c4"><div class="k">单文件体积</div><div class="v">268 KB</div><div class="n">6,292 行 · 零外部素材</div></div>
 </div>
 
 <div class="tabs" id="tabs">
@@ -408,7 +408,7 @@ footer{
     <thead><tr><th>类别</th><th>数量</th><th>明细</th></tr></thead>
     <tbody>
       <tr><td>武器</td><td>4</td><td>爆裂弓（散射）· 穿透激光（贯穿）· 连刃（近身呼吸）· 抛掷炸弹（范围）</td></tr>
-      <tr><td>被动</td><td>6</td><td>贴身精通 · 投掷精通 · 射击精通 · 疾风之靴 · 铁壁之心 · 磁力场</td></tr>
+      <tr><td>被动</td><td>6</td><td>近身精通 · 远程精通 · 急速 · 疾风之靴 · 铁壁之心 · 磁力场</td></tr>
       <tr><td>超武</td><td>6</td><td>箭雨 · 湮灭射线 · 血月斩 · 陨石雨 · 无限回旋 · 荆棘领域（各带一个蓄力必杀）</td></tr>
       <tr><td>小怪</td><td>4</td><td>墨渍虫 · 尖刺兽 · 肥球 · 投掷手</td></tr>
       <tr><td>BOSS</td><td>2</td><td>裂口巨兽（第 5 波）· 千手墨神（第 10 波）</td></tr>
@@ -531,18 +531,25 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
   <p>玩家强度和敌人强度是两条独立的曲线，中间的<strong>差值</strong>才是紧张感。</p>
   <div class="tw">
   <table>
-    <thead><tr><th>波次</th><th>玩家 DPS</th><th>敌人血量</th><th>TTK</th><th>体验目标</th></tr></thead>
+    <thead><tr><th>波次</th><th>小怪血量</th><th>玩家清怪 DPS</th><th>血量 ÷ DPS</th><th>一只需要几发</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td>13</td><td>7</td><td>0.54 秒</td><td>一箭一只，先给爽感</td></tr>
-      <tr><td>3</td><td>119</td><td>21</td><td>0.18 秒</td><td>开始成群</td></tr>
-      <tr><td>5</td><td>517</td><td>66</td><td>0.13 秒</td><td>build 成型的爽点期</td></tr>
-      <tr><td>7</td><td>789</td><td>201</td><td>0.25 秒</td><td>压力回升</td></tr>
-      <tr><td>10</td><td>1,797</td><td>1,078</td><td>0.60 秒</td><td>后期需要走位</td></tr>
+      <tr><td>1</td><td>7</td><td>13</td><td>0.54</td><td>1.2 发</td></tr>
+      <tr><td>3</td><td>14</td><td>119</td><td>0.12</td><td>1.4 发</td></tr>
+      <tr><td>5</td><td>27</td><td>517</td><td>0.05</td><td>1.2 发</td></tr>
+      <tr><td>7</td><td>53</td><td>789</td><td>0.07</td><td>2.1 发</td></tr>
+      <tr><td>10</td><td>145</td><td>1,797</td><td>0.08</td><td>3.5 发</td></tr>
     </tbody>
   </table>
   </div>
-  <p>玩家 DPS 涨了 <strong>138 倍</strong>（13 → 1,797），敌人血量涨了 <strong>154 倍</strong>（7 → 1,078）。两条线不是平行的：玩家在 3-5 波涨得更快，TTK 被压到 <strong>0.13 秒</strong>（这就是「成型后的爽点期」）；敌人血量随后追上来，第 10 波 TTK 回到 <strong>0.60 秒</strong>。</p>
-  <p>所以曲线是 <strong>U 形</strong>，不是单调收紧。0.13 秒那一段是刻意的，但不能更短 —— 再短玩家就看不见怪物长什么样了。</p>
+  <p>「血量 ÷ DPS」是比值不是秒数 —— 清怪 DPS 已经把「一次攻击能碰到几只」折算进去了，拿它反推单只怪要打多久会低估。真实体感看最后一列：<strong>从 1.2 发涨到 3.5 发</strong>。</p>
+  <p>这一版之前血量是每波 ×1.75，第 10 波 154 倍，同一段里玩家单发伤害只涨 6.9 倍，最后一列是 <strong>26 发</strong>。1.75 的问题不是「太硬」，是它和伤害成长<strong>脱钩</strong>：第 5 波前一律一发一只（伤害投进去看不见效果），第 7 波后突然变成三四十发一只（伤害怎么投都不够）。两头都没有「刚好」的区间。改成 ×1.40 之后是一条连续上升的斜率，每次升级都能把「3.5 发」往「2 发」压一点。</p>
+
+  <h3>伤害和攻速各自管什么</h3>
+  <p>这是玩家最常问的问题：「我一直在提伤害，清怪效率没变，提它干什么？」答案分两半。</p>
+  <p><strong>伤害管「跨门槛」。</strong>它只在把「几发一只」压下一档时产生价值：3.5 发 → 2 发 → 1 发。压到 1 发之后，对杂兵再多伤害是<strong>完全浪费</strong>——多出来的部分打在一具已经要死的尸体上。</p>
+  <p><strong>攻速管「单位时间打几轮」。</strong>一旦伤害够一发一只，清怪速率就等于「每秒能打出几发」，这时候攻速是唯一的杠杆。这也是为什么杂兵血量不该涨太快：它们的作用是被量，不是被磨。</p>
+  <p>实测（静止玩家、12 秒、第 10 波）：中期配装（弓 5 + 激光 5）清怪 3.99 只/秒，满配（四把满级 + 突进 4 级）5.33 只/秒。<strong>DPS 翻了一倍多，清怪只多 34%</strong>，因为瓶颈已经从伤害换成了「怪走过来的速度」和「一次攻击能覆盖几只」。所以高血量单位（肥球、精英、BOSS）才是伤害真正兑现的地方，杂兵交给攻速和范围。</p>
+  <p>另外这一版修了一个一直没生效的东西：v0.18 把流派从三条收到两条时，<code>hero.stat.as</code> 还在读已经不存在的 <code>p.shot</code>，也就是<strong>攻速从头到尾恒等于 1.0</strong>，卡面上写的「攻速 +5%/级」一次都没生效过。现在拆出一条独立的「急速」被动（每级 +8%，满级 ×1.40）。</p>
 
   <h3>为什么玩家涨这么快</h3>
   <p>因为伤害是<strong>乘法叠加</strong>：4 把武器 × 5 级 × 攻击 1.70 × 攻速 1.60 × 暴击期望 1.29。每个乘区看起来都只有 1.6-1.7 倍，乘起来就是两个数量级。这也是为什么<strong>敌人血量必须走指数</strong>——等差增长永远追不上乘法增长。</p>
@@ -666,6 +673,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
     <div class="ev"><div class="et">v0.12 · 第一批真机反馈</div><div class="en">手机 HUD 推倒重排，摇杆整层删掉</div><div class="ed">顶部 84 → 67px，等级并入左上、波次合并、提示条下移，三层文字不再叠。摇杆圆盘画到屏幕外的根因是容器原点偏了 42vh —— 输入本来就走 canvas，删掉视觉层不影响操作。震屏改成同批事件边际递减。</div></div>
     <div class="ev"><div class="et">v0.13 · 第二批真机反馈</div><div class="en">BGM 加到 93 秒，地刺改成远程布设</div><div class="ed">战斗曲 32 → 52 小节、BOSS 24 → 32 小节。高潮「抬不起来」的真实原因是混音：旋律音量 0.072 被 0.30 的贝斯压住，改后中高频 RMS 涨 2.5–2.8 倍而总 RMS 平稳。地刺改成目标脚下布设 + 减速 0.65。激光改红，技能按钮移右下。</div></div>
     <div class="ev"><div class="et">v0.14 · 开始界面重做</div><div class="en">从「两张卡片」到「整屏一刀切开」</div><div class="ed">旧模型的问题是盒子并排，屏幕一矮两个盒子一起缩，只能靠三层媒体查询硬补。新结构整屏被斜切光带分成纸面 / 墨面两块，几何由 <code>title.test.mjs</code> 断言守边界。激光从正红改石蓝 <code>#4a7fb8</code>（围墙色系取色，压暗降饱和）。静音统一到右上角。</div></div>
+    <div class="ev"><div class="et">v0.19 · 连刃重做与攻速通道</div><div class="en">伤害管跨门槛，攻速管单位时间打几轮</div><div class="ed">刀刃从一块 Box 拆成刀身 + 刀尖 + 护手 + 握柄 + 柄头五件，沿切线摆（原来沿半径朝外，像太阳光芒），去掉 5 rad/s 的抖动。加了两道同心细环标出呼吸的内外圈。更关键的是数值：攻速从 v0.18 起就一直恒等于 1.0（读的是已经不存在的 <code>p.shot</code>），卡面写着 +5%/级却一次没生效；现在拆出独立的「急速」被动。血量底数从 1.75 降到 1.40 —— 1.75 时第 10 波 154 倍，杂兵要 26 发才死，而玩家单发伤害同期只涨 6.9 倍，两头都不好玩。</div></div>
     <div class="ev"><div class="et">v0.18 · 四职业收敛</div><div class="en">六把武器争一个指标，改成四把各管一件事</div><div class="ed">表上六把武器 Lv5 清怪 DPS 只差 1.27 倍，同一套配装实测却差 10 倍 —— 因为从没定义过测量场景。这一轮不再调平，改成给每把武器一个功能：散射吃覆盖、激光吃单点、连刃吃贴身、炸弹吃密度。地刺与回旋镖下线，流派从三条收到两条，进化前置 3 级降到 2 级。连刃从「每 cd 打一次范围」改成刀刃在内圈 1.15 与外圈 3.9 之间往复，半周期结算一次，外扩打远、回收打近，贴身的怪一个周期吃两下（实测 120 : 72）。卡池加保底：只要还有武器没满级，三张里第一张一定是升级。</div></div>
     <div class="ev"><div class="et">v0.17 · 六职业</div><div class="en">开局先选职业，不再强制射箭</div><div class="ed">六个职业各绑一把起手武器与一个超武，<code>buildHero(cid)</code> 按职业拼六种剪影（头巾弓手 / 盔甲镰客 / 巾尾镖手 / 尖刺刺卫 / 高帽激光师 / 圆桶火药）。进入游戏改成先过一道加载页：点「进入」时才建 AudioContext、起播菜单曲、真编译着色器，音乐不再慢半拍。回旋镖从「叶子轨迹、终点固定在扔出点」改成「直线飞出 → 朝玩家实时坐标飞回手上」，超旋跑两圈。地刺伤害 +12%、单体命中 0.50→0.62；回旋镖清怪系数 0.55→0.78，六把武器清怪极差 1.80× → 1.27×。</div></div>
     <div class="ev"><div class="et">v0.16 · 数值审计</div><div class="en">表、代码、文档三方对账</div><div class="ed">查出六处对不上：图鉴 BOSS 目标耗时写 12/20 秒（实际 32/45）、配置表把弓箭超武的 sHit 0.50 填进了普通列、手册的 BOSS 公式漏了 −7 秒无敌、曲线表五行里四行是 v0.5 的旧配装、曲线形状被写成「两条线平行」而实际是 U 形、首级经验写 18.5 而代码是 9。全部修掉，并把对账做成 <code>docs/tools/audit_numbers.py</code>，进发版流程。</div></div>
@@ -752,6 +760,7 @@ TTK     = 敌人有效血量 ÷ 实际 DPS</pre>
       <tr><td><b>v0.16</b></td><td>10-27 00:55</td><td>标签 <code>v0.16</code></td><td>数值审计：图鉴 BOSS 时长、配置表 sHit、手册曲线与 BOSS 公式对齐代码</td><td>6,107 行 / 264 KB</td></tr>
       <tr><td><b>v0.17</b></td><td>10-27 18:20</td><td>标签 <code>v0.17</code></td><td>六职业 + 六种建模；加载页与音乐预热；回旋镖改成飞出→追踪回手；地刺 / 回旋镖加强</td><td>6,294 行 / 274 KB</td></tr>
       <tr><td><b>v0.18</b></td><td>10-28 01:50</td><td>标签 <code>v0.18</code></td><td>四职业收敛：散射 / 激光手 / 连刃 / 炸弹手；流派 3→2；连刃改呼吸两段；卡池保底</td><td>6,230 行 / 264 KB</td></tr>
+      <tr><td><b>v0.19</b></td><td>10-29 03:20</td><td>标签 <code>v0.19</code></td><td>连刃模型重做；攻速通道修复 + 急速被动；血量曲线 1.75→1.40、刷怪 9%→5%</td><td>6,292 行 / 268 KB</td></tr>
       <tr><td><b>v0.17.1</b></td><td>10-27 23:40</td><td>标签 <code>v0.17.1</code></td><td>删掉界面上的解释性文案 15 处 + 失效 CSS；小屏隐藏职业标签与键位条</td><td>6,263 行 / 267 KB</td></tr>
     </tbody>
   </table>

@@ -53,6 +53,19 @@ def num(text, key, default=None):
     return float(m.group(1)) if m else default
 
 
+def const_num(name, default=None):
+    """读 `var X = 1.40;` 这种顶层常量。
+
+    原来用 num() 读它，而 num 找的是 `KEY:值` 这种对象字面量写法 ——
+    对 `var WAVE_HP_R = 1.40;` 永远匹配不到，于是**静默**用了默认值 1.75。
+    曲线改成 1.40 之后审计仍然报 PASS，就是因为这个。常量读不到必须吵。"""
+    m = re.search(r"var\s+" + re.escape(name) + r"\s*=\s*(-?[0-9.]+)", src)
+    if not m:
+        check("能从代码读到常量 " + name, False, "正则没匹配到，下面的比对不可信")
+        return default
+    return float(m.group(1))
+
+
 W = {}
 for wid in ("bow", "laser", "blade", "bomb"):
     i = wdef_src.find(wid + ":{")
@@ -68,9 +81,9 @@ for wid in ("bow", "laser", "blade", "bomb"):
 
 ARCH_DMG = num(src, "ARCH_DMG", 0.20)
 SET_BONUS = num(src, "SET_BONUS", 1.30)
-HP_R = num(src, "WAVE_HP_R", 1.75)
-DMG_STEP = num(src, "WAVE_DMG_STEP", 0.10)
-RATE_STEP = num(src, "WAVE_RATE_STEP", 0.09)
+HP_R = const_num("WAVE_HP_R")
+DMG_STEP = const_num("WAVE_DMG_STEP")
+RATE_STEP = const_num("WAVE_RATE_STEP", 0.05)
 CRIT_MUL = float(re.search(r"if\(isCrit\) dmg \*= ([0-9.]+)", src).group(1))
 INVULN = float(re.search(r"hero\.invuln = ([0-9.]+);", src).group(1))
 XP_A, XP_B = [float(x) for x in re.search(r"Math\.round\(([0-9.]+) \+ hero\.lv\*([0-9.]+)\)", src).groups()]
@@ -267,7 +280,9 @@ check("手册 BOSS 公式扣掉 7 秒无敌",
 want_dps = f"{EXPECTED[9]:,}"
 want_ttk = f"{E['blob']['hp'] * HP_R**9 / EXPECTED[9]:.2f} 秒"
 check("手册第 10 波 DPS = EXPECTED_DPS[9]", want_dps in DOC, f"应为 {want_dps}")
-check("手册第 10 波 TTK 与实算一致", want_ttk in DOC, f"应为 {want_ttk}")
+# 手册曲线表的「小怪血量」列：第 10 波 = 墨渍虫基础血 × HP_R^9
+want_hp = f"{round(E['blob']['hp'] * HP_R ** 9)}"
+check("手册第 10 波小怪血量 = 7×HP_R^9", want_hp in DOC, f"应为 {want_hp}")
 
 print()
 print("=" * 74)
