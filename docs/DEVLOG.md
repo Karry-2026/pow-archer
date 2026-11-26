@@ -3541,3 +3541,24 @@ node scripts/scan.mjs <root> --json
 
 1. `index.html` 里有两段条件相同的 `@media (max-height: 520px)`，应该合并成一段。这次只修了值没合并，因为合并会动 50 多行 CSS，值得单独一次提交。
 2. 扫描器的第 06/19 组在游戏里基本都会是误报。下次换项目（比如作品集落地页）再跑，判断标准要重来一遍，不能照搬这次的结论。
+
+
+---
+
+## v0.20（2026-11-27）：美漫画面精细度升级 + 数值曲线重校准 + 公开仓可移植性修复
+
+- **根因**：
+  1. `v0.18`/`v0.19` 改完四职业与 `HP_R=1.40` 后未同步 `EXPECTED_DPS`，导致 `calc_curve.py` 仅 3/10 波在 ±6% 内（第 1 波偏差 +63.1%、第 4 波 +46.5%）。
+  2. 桌面端 `.hud-right` 的 `padding-top: 52px` 低于右上角静音+音量控件底边（~86px），导致 `KILLS` 被「音量」按钮遮挡。
+  3. 地面贴图 768×768 铺满 86 单位直径导致纹路发虚、外圈石块无墨线描边且缺少边界警戒环、角色与怪物低模细节单薄。
+  4. `docs/tools/audit_numbers.py` 与 `calc_curve.py` 硬编码了本机绝对路径，外部克隆后直接报错。
+- **做法**：
+  1. 将 `EXPECTED_DPS` 校准为 `[21, 36, 142, 264, 430, 664, 832, 1088, 1371, 1770]` 并同步 `docs/开发文档.html`。
+  2. `.hud-right` 桌面 `padding-top` 调至 `82px` 消除遮挡。
+  3. 美漫精细化：`pixelRatio` 上限提至 2；升级四阶高反差色阶贴图与冷暖补光；`makeFloorTex()` 升至 2048×2048（战术网格、Ben-Day 网点、刻度环、排线刻痕与中央星芒靶标）；竞技场新增墨线+明黄警戒环及带黑边与底座投影的错落石柱；角色与四种小怪在原有 `mergeParts` 单 draw call 架构内补齐披风、腰带扣、反曲弓箭筒、双刃护手、法杖聚能环、眉毛与赛璐珞高光点；贴地投影按主光源方向轻微偏移。
+  4. `audit_numbers.py` 与 `calc_curve.py` 改为 `Path(__file__).resolve().parents[2]` 相对路径；同步修正 `README.md` 与 `VERSIONS.md` 的四职业口径和 GitHub Pages 链接。
+- **验证**：
+  - `python docs/tools/audit_numbers.py`：全部 PASS（配置表/代码/文档三方一致）。
+  - `python docs/tools/calc_curve.py`：10/10 波在 ±6% 内（第 6–10 波偏差 0.0%）。
+  - `node tests/cardpool.test.mjs`：13/13 通过。
+  - Playwright Edge Chromium 实机渲染截图验收（战斗中心 + 边界巡航）：0 JS 报错、`KILLS` 完整露出、地板网格/网点/描边石柱/角色细节清晰。

@@ -3,9 +3,11 @@
 改完武器/被动参数后跑一次：python docs/tools/calc_curve.py
 可选：python docs/tools/calc_curve.py --write  把建议值写回 index.html
 """
+from pathlib import Path
 import re, sys
 
-HTML = "C:/Users/karry/WorkBuddy/2026-10-23-00-53-14/pow-archer/index.html"
+ROOT = Path(__file__).resolve().parents[2]
+HTML = str(ROOT / "index.html")
 src = open(HTML, encoding="utf-8").read()
 
 

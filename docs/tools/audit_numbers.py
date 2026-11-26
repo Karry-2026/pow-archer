@@ -8,13 +8,15 @@
 用法：python docs/tools/audit_numbers.py
 退出码 0 = 全对，1 = 有对不上的项。
 """
+from pathlib import Path
 import re
 import sys
 import openpyxl
 
-HTML = r"C:\Users\karry\WorkBuddy\2026-10-23-00-53-14\pow-archer\index.html"
-XLSX_CFG = r"C:\Users\karry\WorkBuddy\2026-10-23-00-53-14\pow-archer\docs\爆裂弓箭手_数值配置表.xlsx"
-XLSX_NUM = r"C:\Users\karry\WorkBuddy\2026-10-23-00-53-14\pow-archer\docs\爆裂弓箭手_数值分析表.xlsx"
+ROOT = Path(__file__).resolve().parents[2]
+HTML = str(ROOT / "index.html")
+XLSX_CFG = str(ROOT / "docs" / "爆裂弓箭手_数值配置表.xlsx")
+XLSX_NUM = str(ROOT / "docs" / "爆裂弓箭手_数值分析表.xlsx")
 
 src = open(HTML, encoding="utf-8").read()
 
@@ -263,8 +265,8 @@ print("=" * 74)
 print("三、文档 vs 代码")
 print("=" * 74)
 
-DOC = open(r"C:\Users\karry\WorkBuddy\2026-10-23-00-53-14\pow-archer\docs\开发文档.html", encoding="utf-8").read()
-NUM = open(r"C:\Users\karry\WorkBuddy\2026-10-23-00-53-14\pow-archer\docs\NUMBERS.md", encoding="utf-8").read()
+DOC = open(ROOT / "docs" / "开发文档.html", encoding="utf-8").read()
+NUM = open(ROOT / "docs" / "NUMBERS.md", encoding="utf-8").read()
 
 # 图鉴里的 BOSS 目标耗时
 if codex_ttk:

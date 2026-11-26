@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#9ed4f5">
-<meta name="app-version" content="v0.19.1">
+<meta name="app-version" content="v0.20">
 <meta name="app-built" content="2026-10-29">
 <title>爆裂弓箭手</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0a12'/%3E%3Ccircle cx='16' cy='16' r='9' fill='%23ff2e88'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%23ffe600'/%3E%3C/svg%3E">
@@ -449,9 +449,9 @@ canvas#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
   transition:width .12s}
 .hpbar:after{content:"";position:absolute;inset:0;
   background:repeating-linear-gradient(90deg,transparent 0 12px,rgba(10,10,18,.35) 12px 14px)}
-/* 静音按钮钉在右上角，击杀数往下一档，避免压在同一块 */
+/* 静音按钮 + 音量按钮钉在右上角（底边约 86px），击杀数让位至 94px 避免被遮挡 */
 .hud-right{text-align:right;justify-self:end;display:flex;flex-direction:column;
-  align-items:flex-end;gap:9px;padding-top:52px}
+  align-items:flex-end;gap:9px;padding-top:82px}
 .lvbadge{display:inline-block;background:var(--yel);color:var(--ink);border:4px solid var(--ink);
   padding:3px 12px;transform:skewX(-8deg);box-shadow:4px 4px 0 rgba(10,10,18,.55);
   font-family:var(--disp);font-size:17px;letter-spacing:.08em}
@@ -1206,12 +1206,12 @@ var MAX_ENEMY = 170;
 /* ─────────── 渲染 ─────────── */
 var canvas = $('gl');
 var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1, 1.6));
+renderer.setPixelRatio(Math.min(devicePixelRatio||1, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.setClearColor(0xa9cbe4, 1);   /* 原 #9ed4f5：太亮，把经验球压没了 */
 
 var scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0xc4def2, 60, 105);
+scene.fog = new THREE.Fog(0xc4def2, 62, 108);
 
 var camera = new THREE.PerspectiveCamera(46, innerWidth/innerHeight, 0.5, 220);
 var camTarget = new THREE.Vector3(0,0,0);
@@ -1220,18 +1220,18 @@ var camShake = 0, camShakeT = 0;
    只改机位距离、不改跟随位置，所以不会破坏「硬跟随不抽搐」那条规则。 */
 var ultPunch = 0;
 
-var hemi = new THREE.HemisphereLight(0xffffff, 0x9fc4e8, 0.95);
+var hemi = new THREE.HemisphereLight(0xffffff, 0x8bb6dd, 0.88);
 scene.add(hemi);
-var dir = new THREE.DirectionalLight(0xfffaf0, 1.18);
+var dir = new THREE.DirectionalLight(0xfff6e5, 1.24);
 dir.position.set(-18, 34, 14);
 scene.add(dir);
-var rim = new THREE.DirectionalLight(0xff9ec8, 0.34);
+var rim = new THREE.DirectionalLight(0xff8ec4, 0.42);
 rim.position.set(20, 12, -22);
 scene.add(rim);
 
-/* 三阶色阶贴图 —— 美漫的关键：明暗只有三档，不要渐变 */
+/* 四阶高反差色阶贴图 —— 美漫硬切明暗，暗部更沉、亮部更脆 */
 function makeGradientMap(){
-  var data = new Uint8Array([70, 140, 205, 255]);
+  var data = new Uint8Array([54, 128, 206, 255]);
   var tex = new THREE.DataTexture(data, 4, 1, THREE.RedFormat);
   tex.minFilter = THREE.NearestFilter;
   tex.magFilter = THREE.NearestFilter;
@@ -1266,38 +1266,105 @@ function part(geo, color, k){
 /* ─────────── 程序化贴图 ─────────── */
 function hvCanvas(w,h){ var c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
 
-/* 漫画地板：放射线 + 同心圆 + 网点 */
+/* 漫画地板（2048×2048）：战术网格 + 清晰网点 + 放射构图 + 刻度环 + 墨线刻痕 + 中央靶标 */
 function makeFloorTex(){
-  var S=768, cv=hvCanvas(S,S), g=cv.getContext('2d'), c=S/2;
-  /* 底色从 #e4f2fd 压到 #c9dfef：明度 95 → 82。
-     地面是 60% 的画面面积，它越亮，上面的东西越难看清。 */
-  g.fillStyle='#c9dfef'; g.fillRect(0,0,S,S);
-  // 放射线
+  var S=2048, cv=hvCanvas(S,S), g=cv.getContext('2d'), c=S/2;
+  /* 保持明度 ≈82 的冷静浅蓝纸底，不与高饱和敌人/经验球抢层级 */
+  g.fillStyle='#c8deee'; g.fillRect(0,0,S,S);
+
+  // 1) 轻柔放射底纹（保留美漫构图，不抢前景）
   g.save(); g.translate(c,c);
   for(var i=0;i<48;i++){
     g.rotate(TAU/48);
-    g.beginPath(); g.moveTo(0,0); g.lineTo(0, S*0.62);
-    /* 放射线原来开到 .42/.85，在亮底上是一层白噪声。降到 .16/.30，
-       保留美漫的放射构图，但不再和地面的物件抢注意力。 */
-    g.strokeStyle = i%2 ? 'rgba(120,180,225,.10)' : 'rgba(176,210,240,.20)';
-    g.lineWidth = i%2 ? 10 : 22; g.stroke();
+    g.beginPath(); g.moveTo(0,0); g.lineTo(0, S*0.56);
+    g.strokeStyle = i%2 ? 'rgba(92,150,198,.085)' : 'rgba(232,244,254,.17)';
+    g.lineWidth = i%2 ? 20 : 42; g.stroke();
   }
   g.restore();
-  // 同心圆
-  for(var r=40;r<c;r+=42){
-    g.beginPath(); g.arc(c,c,r,0,TAU);
-    g.strokeStyle='rgba(255,255,255,.26)'; g.lineWidth=3; g.stroke();
+
+  // 2) 漫画分镜地砖网格 + 十字对位标（提供清晰的移动速度参照）
+  var step = 128;
+  g.strokeStyle='rgba(44,92,136,.11)'; g.lineWidth=2;
+  for(var gx=step;gx<S;gx+=step){
+    g.beginPath(); g.moveTo(gx,0); g.lineTo(gx,S); g.stroke();
+    g.beginPath(); g.moveTo(0,gx); g.lineTo(S,gx); g.stroke();
   }
-  // 网点
-  g.fillStyle='rgba(96,150,196,.10)';
-  for(var y=0;y<S;y+=7){ for(var x=(y/7%2)*7;x<S;x+=14){ g.fillRect(x,y,2.4,2.4); } }
-  // 中央标志
+  g.strokeStyle='rgba(26,56,88,.20)'; g.lineWidth=2.5;
+  for(var cy=step;cy<S;cy+=step*2){
+    for(var cx=step;cx<S;cx+=step*2){
+      g.beginPath(); g.moveTo(cx-9,cy); g.lineTo(cx+9,cy); g.moveTo(cx,cy-9); g.lineTo(cx,cy+9); g.stroke();
+    }
+  }
+
+  // 3) 锐利 Ben-Day 印刷网点（外圈略密、中心通透）
+  g.fillStyle='rgba(58,112,160,.115)';
+  for(var y=12;y<S;y+=20){
+    var off=(Math.floor(y/20)%2)*10;
+    for(var x=off;x<S;x+=20){
+      var dx=x-c, dy=y-c, rr=Math.sqrt(dx*dx+dy*dy)/c;
+      if(rr > 0.16 && rr < 0.96){
+        var rad = 1.6 + rr * 1.4;
+        g.beginPath(); g.arc(x,y,rad,0,TAU); g.fill();
+      }
+    }
+  }
+
+  // 4) 同心战术刻度环（交替实线 / 虚线 + 角度刻度）
+  var rings = [140, 290, 460, 650, 845, 955];
+  rings.forEach(function(rad, idx){
+    g.save();
+    g.beginPath();
+    if(idx%2===1) g.setLineDash([22, 16]);
+    g.arc(c,c,rad,0,TAU);
+    g.strokeStyle = idx===5 ? 'rgba(18,36,62,.36)' : (idx%2===0 ? 'rgba(255,255,255,.34)' : 'rgba(34,76,116,.18)');
+    g.lineWidth = idx===5 ? 7 : (idx%2===0 ? 4 : 3);
+    g.stroke();
+    g.restore();
+  });
+  // 角度短刻度
   g.save(); g.translate(c,c);
-  g.beginPath(); g.arc(0,0,16,0,TAU); g.fillStyle='rgba(255,46,136,.16)'; g.fill();
-  g.beginPath(); g.arc(0,0,16,0,TAU); g.strokeStyle='rgba(255,46,136,.38)'; g.lineWidth=4; g.stroke();
+  g.strokeStyle='rgba(24,52,82,.24)'; g.lineWidth=3;
+  for(var tk=0;tk<72;tk++){
+    var a=tk/72*TAU;
+    var r0 = tk%6===0 ? 928 : 940;
+    g.beginPath();
+    g.moveTo(Math.cos(a)*r0, Math.sin(a)*r0);
+    g.lineTo(Math.cos(a)*955, Math.sin(a)*955);
+    g.stroke();
+  }
   g.restore();
+
+  // 5) 美漫排线刻痕（中环 8 组低对比排线，增加手绘纸面质感）
+  g.save(); g.translate(c,c);
+  g.strokeStyle='rgba(36,78,118,.15)'; g.lineWidth=2.5;
+  for(var h=0;h<8;h++){
+    var ha = h/8*TAU + 0.35, hr = 410 + (h%2)*210;
+    g.save(); g.rotate(ha); g.translate(hr, 0); g.rotate(0.5);
+    for(var s=-18;s<=18;s+=9){
+      g.beginPath(); g.moveTo(s,-16); g.lineTo(s+6,16); g.stroke();
+    }
+    g.restore();
+  }
+  g.restore();
+
+  // 6) 中央漫画靶标徽章（8 角微星芒 + 双层墨线环）
+  g.save(); g.translate(c,c);
+  g.beginPath();
+  for(var sp=0;sp<16;sp++){
+    var sa=sp/16*TAU, sr=sp%2===0?66:34;
+    if(sp===0) g.moveTo(Math.cos(sa)*sr, Math.sin(sa)*sr);
+    else g.lineTo(Math.cos(sa)*sr, Math.sin(sa)*sr);
+  }
+  g.closePath();
+  g.fillStyle='rgba(255,46,136,.12)'; g.fill();
+  g.strokeStyle='rgba(26,48,78,.24)'; g.lineWidth=3; g.stroke();
+  g.beginPath(); g.arc(0,0,40,0,TAU); g.fillStyle='rgba(255,246,233,.45)'; g.fill();
+  g.strokeStyle='rgba(255,46,136,.42)'; g.lineWidth=5; g.stroke();
+  g.beginPath(); g.arc(0,0,14,0,TAU); g.fillStyle='rgba(255,46,136,.28)'; g.fill();
+  g.restore();
+
   var t=new THREE.CanvasTexture(cv);
-  t.anisotropy=4;
+  t.anisotropy=Math.min(8, renderer.capabilities.getMaxAnisotropy()||4);
   return t;
 }
 
@@ -1329,33 +1396,63 @@ function buildArena(){
   floor.position.y = -0.02;
   world.add(floor);
 
-  // 外圈围墙：一圈墨块
-  var n = 46;
+  // 竞技场边界墨线警戒环：让可走范围一目了然
+  var borderRing = new THREE.Mesh(
+    new THREE.RingGeometry(ARENA_R-0.28, ARENA_R+0.26, 96),
+    new THREE.MeshBasicMaterial({color:0x0a0a12, side:THREE.DoubleSide})
+  );
+  borderRing.rotation.x = -Math.PI/2; borderRing.position.y = 0.015;
+  world.add(borderRing);
+  var borderInner = new THREE.Mesh(
+    new THREE.RingGeometry(ARENA_R-0.54, ARENA_R-0.34, 96),
+    new THREE.MeshBasicMaterial({color:0xffe600, transparent:true, opacity:0.65, side:THREE.DoubleSide})
+  );
+  borderInner.rotation.x = -Math.PI/2; borderInner.position.y = 0.012;
+  world.add(borderInner);
+
+  // 外圈围墙：带黑色漫画描边与高低错落剪影的色块石柱
+  var n = 48;
   var rockGeo = new THREE.IcosahedronGeometry(1, 0);
+  var pillarGeo = new THREE.CylinderGeometry(0.75, 1.05, 1.8, 6);
+  var baseShadowGeo = new THREE.CircleGeometry(1, 14); baseShadowGeo.rotateX(-Math.PI/2);
+  var baseShadowMat = new THREE.MeshBasicMaterial({color:0x142a40, transparent:true, opacity:0.26, depthWrite:false});
+  var ROCKC = [0x7ac74f, 0xffa53d, 0x4fb3e8, 0xff7ab8, 0xf5d13e, 0x9b7bea];
   for(var i=0;i<n;i++){
     var a = i/n*TAU;
-    var r = ARENA_R + rnd(1.2, 2.6);
-    var s = rnd(1.4, 2.6);
-    var col = [COS.pur, COS.mag, COS.blue, COS.cyan][i%4] || COS.pur;
-    var ROCKC = [0x7ac74f, 0xffa53d, 0x4fb3e8, 0xff7ab8, 0xf5d13e, 0x9b7bea];
-    var m = new THREE.Mesh(rockGeo, toon(ROCKC[i % ROCKC.length]));
-    m.position.set(Math.cos(a)*r, rnd(-0.3,0.5), Math.sin(a)*r);
-    m.scale.set(s, s*rnd(.9,1.6), s);
-    m.rotation.set(rnd(0,3), rnd(0,3), rnd(0,3));
+    var r = ARENA_R + rnd(1.5, 2.7);
+    var s = rnd(1.35, 2.45);
+    var isPillar = (i % 4 === 0);
+    var m = new THREE.Mesh(isPillar ? pillarGeo : rockGeo, toon(ROCKC[i % ROCKC.length]));
+    withOutline(m, 1.09);
+    m.position.set(Math.cos(a)*r, isPillar ? s*0.62 : rnd(-0.15, 0.55), Math.sin(a)*r);
+    m.scale.set(s, s*(isPillar ? rnd(1.05,1.55) : rnd(0.85,1.45)), s);
+    m.rotation.set(isPillar ? rnd(-0.08,0.08) : rnd(0,3), rnd(0,3), isPillar ? rnd(-0.08,0.08) : rnd(0,3));
     world.add(m);
+    var sh = new THREE.Mesh(baseShadowGeo, baseShadowMat);
+    sh.position.set(Math.cos(a)*r + 0.35, 0.01, Math.sin(a)*r - 0.25);
+    sh.scale.setScalar(s * 1.15);
+    world.add(sh);
   }
 
-  // 地面装饰：几个大色块圆盘
+  // 地面装饰：带细墨线外环的战术圆盘（低对比度，不干扰战斗辨识）
   for(var k=0;k<7;k++){
     var a2 = k/7*TAU + 0.4;
-    var rr = rnd(10, 30);
+    var rr = rnd(11, 29);
+    var dr = rnd(2.6, 4.6);
     var disc = new THREE.Mesh(
-      new THREE.CircleGeometry(rnd(2.5,5), 24),
-      new THREE.MeshBasicMaterial({color: k%2?0xc8e6fb:0xb6dcf7, transparent:true, opacity:.5})
+      new THREE.CircleGeometry(dr, 28),
+      new THREE.MeshBasicMaterial({color: k%2?0xd2eafc:0xb9def8, transparent:true, opacity:.46})
     );
     disc.rotation.x = -Math.PI/2;
-    disc.position.set(Math.cos(a2)*rr, 0.01, Math.sin(a2)*rr);
+    disc.position.set(Math.cos(a2)*rr, 0.008, Math.sin(a2)*rr);
     world.add(disc);
+    var ring = new THREE.Mesh(
+      new THREE.RingGeometry(dr-0.09, dr, 28),
+      new THREE.MeshBasicMaterial({color:0x2b5a84, transparent:true, opacity:0.24, side:THREE.DoubleSide})
+    );
+    ring.rotation.x = -Math.PI/2;
+    ring.position.set(Math.cos(a2)*rr, 0.011, Math.sin(a2)*rr);
+    world.add(ring);
   }
 }
 buildArena();
@@ -2162,16 +2259,16 @@ function instPool(geo, mat, max){
   return m;
 }
 
-/* 贴地投影 */
-var shadowGeo = new THREE.CircleGeometry(1, 14); shadowGeo.rotateX(-Math.PI/2);
+/* 贴地投影：匹配主光源方向轻微偏移，增强角色落地感与美漫赛璐珞对比 */
+var shadowGeo = new THREE.CircleGeometry(1, 20); shadowGeo.rotateX(-Math.PI/2);
 var shadowPool = instPool(shadowGeo,
-  new THREE.MeshBasicMaterial({color:0x3a6b96, transparent:true, opacity:0.20, depthWrite:false}), 300);
+  new THREE.MeshBasicMaterial({color:0x1a3552, transparent:true, opacity:0.30, depthWrite:false}), 300);
 var shadowIdx = 0;
 function pushShadow(x, z, r, alpha){
   if(shadowIdx >= 300) return;
-  _dm.position.set(x, 0.035, z);
+  _dm.position.set(x + 0.14, 0.035, z - 0.10);
   _dm.rotation.set(0,0,0);
-  _dm.scale.set(r, 1, r*0.86);
+  _dm.scale.set(r*1.04, 1, r*0.86);
   _dm.updateMatrix();
   shadowPool.setMatrixAt(shadowIdx++, _dm.matrix);
 }
@@ -2278,60 +2375,88 @@ function buildHero(cid){
   var P = [];
   var body = C.body, acc = C.accent;
 
-  /* 躯干：火药用圆桶身材，其余收腰圆柱 */
+  /* 躯干：火药用圆桶甲身，其余收腰披风战服 + 腰带扣环 + 领口围巾 */
   if(C.id === 'bomber'){
-    P.push({geo:G_sphere(0.60, 14, 12), color:body, y:0.76, sy:1.02});
-    P.push({geo:G_cyl(0.30, 0.38, 0.20, 10), color:acc, y:1.16});
+    P.push({geo:G_sphere(0.60, 16, 12), color:body, y:0.76, sy:1.02});
+    P.push({geo:G_cyl(0.57, 0.57, 0.12, 14), color:INK, y:0.62});
+    P.push({geo:G_box(0.22, 0.14, 0.10), color:0xffe600, y:0.62, z:0.55});
+    P.push({geo:G_cyl(0.32, 0.40, 0.22, 12), color:acc, y:1.16});
   } else {
-    P.push({geo:G_cyl(0.34, 0.52, 0.86, 10), color:body, y:0.55});
+    P.push({geo:G_cyl(0.34, 0.53, 0.86, 14), color:body, y:0.55});
+    /* 腰带 + 金色腰扣 + 领巾 */
+    P.push({geo:G_cyl(0.45, 0.48, 0.12, 14), color:INK, y:0.44});
+    P.push({geo:G_box(0.20, 0.13, 0.10), color:0xffe600, y:0.44, z:0.45});
+    P.push({geo:G_cyl(0.39, 0.35, 0.14, 12), color:acc, y:0.96});
+    /* 背后飘扬短披风（增强俯视角剪影与方向辨识） */
+    P.push({geo:G_box(0.56, 0.58, 0.08), color:acc, y:0.64, z:-0.42, rx:0.34});
   }
-  /* 头 / 眼 / 脚：六个职业共用 */
-  P.push({geo:G_sphere(0.40, 14, 12), color:0xfff0d0, y:1.26});
-  P.push({geo:G_sphere(0.075, 8, 8), color:INK, x:-0.14, y:1.32, z:0.36});
-  P.push({geo:G_sphere(0.075, 8, 8), color:INK, x:0.14, y:1.32, z:0.36});
-  P.push({geo:G_sphere(0.16, 8, 6), color:INK, x:-0.20, y:0.12});
-  P.push({geo:G_sphere(0.16, 8, 6), color:INK, x:0.20, y:0.12});
+  /* 头 / 凶悍眉眼 / 赛璐珞高光点 / 战靴 */
+  P.push({geo:G_sphere(0.41, 16, 12), color:0xfff0d0, y:1.28});
+  P.push({geo:G_sphere(0.08, 8, 8), color:INK, x:-0.14, y:1.31, z:0.37});
+  P.push({geo:G_sphere(0.08, 8, 8), color:INK, x:0.14, y:1.31, z:0.37});
+  P.push({geo:G_box(0.16, 0.045, 0.06), color:INK, x:-0.14, y:1.41, z:0.37, rz:-0.26});
+  P.push({geo:G_box(0.16, 0.045, 0.06), color:INK, x:0.14, y:1.41, z:0.37, rz:0.26});
+  P.push({geo:G_sphere(0.06, 6, 6), color:WHITE, x:-0.15, y:1.58, z:0.18});
+  P.push({geo:G_sphere(0.17, 10, 8), color:INK, x:-0.21, y:0.13, z:0.05});
+  P.push({geo:G_sphere(0.17, 10, 8), color:INK, x:0.21, y:0.13, z:0.05});
 
   if(C.id === 'scatter'){
-    /* 散射：头巾 + 双肩甲 + 三段弓（弓身凸向 +Z，弦在后） */
-    P.push({geo:G_cone(0.42, 0.34, 8), color:acc, y:1.58, ry:0.4});
-    P.push({geo:G_ico(0.20), color:acc, x:-0.42, y:0.86});
-    P.push({geo:G_ico(0.20), color:acc, x:0.42, y:0.86});
-    P.push({geo:G_box(0.10, 0.64, 0.14), color:0x4a2c6b, x:0.66, y:1.26, z:0.16, rx:-0.50, rz:-0.34});
-    P.push({geo:G_box(0.10, 0.64, 0.14), color:0x4a2c6b, x:0.66, y:0.76, z:0.16, rx:0.50, rz:0.34});
-    P.push({geo:G_box(0.03, 0.98, 0.03), color:0xfff6e9, x:0.55, y:1.01, z:0.02});
+    /* 散射：猎手尖帽 + 双层护肩 + 背部箭筒(三支尾羽) + 四段反曲弓与亮弦 */
+    P.push({geo:G_cone(0.45, 0.36, 10), color:acc, y:1.60, rx:-0.15, ry:0.3});
+    P.push({geo:G_cyl(0.44, 0.46, 0.07, 14), color:INK, y:1.44});
+    P.push({geo:G_ico(0.22), color:acc, x:-0.44, y:0.88});
+    P.push({geo:G_ico(0.22), color:acc, x:0.44, y:0.88});
+    /* 箭筒与三支箭羽 */
+    P.push({geo:G_cyl(0.11, 0.09, 0.56, 8), color:0x4a2c6b, x:-0.20, y:0.86, z:-0.42, rz:0.32});
+    P.push({geo:G_cone(0.06, 0.14, 5), color:0x00e5ff, x:-0.30, y:1.18, z:-0.42, rz:0.32});
+    P.push({geo:G_cone(0.06, 0.14, 5), color:0xffe600, x:-0.22, y:1.21, z:-0.38, rz:0.24});
+    /* 反曲弓：握把 + 上下双折弓臂 + 高亮弓弦 + 搭箭 */
+    P.push({geo:G_box(0.11, 0.24, 0.13), color:INK, x:0.68, y:1.01, z:0.22});
+    P.push({geo:G_box(0.10, 0.48, 0.12), color:0x4a2c6b, x:0.68, y:1.28, z:0.16, rx:-0.48, rz:-0.22});
+    P.push({geo:G_box(0.10, 0.48, 0.12), color:0x4a2c6b, x:0.68, y:0.74, z:0.16, rx:0.48, rz:0.22});
+    P.push({geo:G_box(0.07, 0.22, 0.09), color:0x00e5ff, x:0.64, y:1.50, z:0.03, rx:-0.85});
+    P.push({geo:G_box(0.07, 0.22, 0.09), color:0x00e5ff, x:0.64, y:0.52, z:0.03, rx:0.85});
+    P.push({geo:G_box(0.03, 1.02, 0.03), color:0xfff6e9, x:0.58, y:1.01, z:-0.02});
   } else if(C.id === 'blade'){
-    /* 连刃：半球盔 + 盔檐 + 方肩 + 背后交叉双刃 */
-    P.push({geo:G_sphere(0.42, 14, 10), color:acc, y:1.30, sy:0.74});
-    P.push({geo:G_cyl(0.50, 0.46, 0.09, 12), color:acc, y:1.12});
-    P.push({geo:G_box(0.28, 0.12, 0.28), color:0x0f2c1e, x:-0.50, y:0.92});
-    P.push({geo:G_box(0.28, 0.12, 0.28), color:0x0f2c1e, x:0.50, y:0.92});
-    P.push({geo:G_box(0.08, 1.10, 0.08), color:0x4a2c6b, x:-0.46, y:1.30, z:-0.30, rz:0.34});
-    P.push({geo:G_box(0.42, 0.09, 0.12), color:0x8fe04a, x:-0.62, y:1.82, z:-0.30, rz:-0.45});
-    P.push({geo:G_box(0.08, 1.10, 0.08), color:0x4a2c6b, x:0.46, y:1.30, z:-0.30, rz:-0.34});
-    P.push({geo:G_box(0.42, 0.09, 0.12), color:0x8fe04a, x:0.62, y:1.82, z:-0.30, rz:0.45});
+    /* 连刃：战盔头冠 + 盔檐 + 装甲肩甲 + 背后交叉荧光双刃(带护手) */
+    P.push({geo:G_sphere(0.44, 16, 12), color:acc, y:1.33, sy:0.76});
+    P.push({geo:G_box(0.10, 0.24, 0.48), color:0xffe600, y:1.66, z:0.04});
+    P.push({geo:G_cyl(0.52, 0.48, 0.09, 14), color:INK, y:1.15});
+    P.push({geo:G_box(0.32, 0.16, 0.30), color:0x0f2c1e, x:-0.52, y:0.94, rz:0.22});
+    P.push({geo:G_box(0.32, 0.16, 0.30), color:0x0f2c1e, x:0.52, y:0.94, rz:-0.22});
+    P.push({geo:G_box(0.08, 1.15, 0.08), color:0x4a2c6b, x:-0.46, y:1.32, z:-0.32, rz:0.36});
+    P.push({geo:G_box(0.24, 0.07, 0.14), color:0xffe600, x:-0.54, y:1.56, z:-0.32, rz:0.36});
+    P.push({geo:G_box(0.48, 0.10, 0.14), color:0xb6ff3c, x:-0.66, y:1.86, z:-0.32, rz:-0.42});
+    P.push({geo:G_box(0.08, 1.15, 0.08), color:0x4a2c6b, x:0.46, y:1.32, z:-0.32, rz:-0.36});
+    P.push({geo:G_box(0.24, 0.07, 0.14), color:0xffe600, x:0.54, y:1.56, z:-0.32, rz:-0.36});
+    P.push({geo:G_box(0.48, 0.10, 0.14), color:0xb6ff3c, x:0.66, y:1.86, z:-0.32, rz:0.42});
   } else if(C.id === 'beam'){
-    /* 激光手：高帽 + 护目镜条 + 法杖（顶端一颗发光晶体） */
-    P.push({geo:G_cyl(0.26, 0.42, 0.10, 12), color:acc, y:1.50});
-    P.push({geo:G_cyl(0.26, 0.30, 0.46, 10), color:acc, y:1.76});
-    P.push({geo:G_box(0.54, 0.10, 0.06), color:INK, y:1.33, z:0.35});
-    P.push({geo:G_cyl(0.05, 0.05, 1.50, 8), color:0x2f3b4a, x:0.62, y:0.90, z:0.10});
-    P.push({geo:G_octa(0.17), color:C.glow, x:0.62, y:1.74, z:0.10});
+    /* 激光手：双层法帽 + 发光帽带 + 赛博护目镜 + 晶棱法杖与聚能环 */
+    P.push({geo:G_cyl(0.30, 0.50, 0.10, 14), color:acc, y:1.52});
+    P.push({geo:G_cyl(0.30, 0.32, 0.08, 14), color:C.glow, y:1.60});
+    P.push({geo:G_cone(0.30, 0.56, 12), color:acc, y:1.88, rx:-0.14});
+    P.push({geo:G_box(0.56, 0.12, 0.08), color:INK, y:1.34, z:0.36});
+    P.push({geo:G_box(0.44, 0.06, 0.05), color:C.glow, y:1.34, z:0.41});
+    P.push({geo:G_cyl(0.055, 0.055, 1.56, 8), color:0x2f3b4a, x:0.64, y:0.92, z:0.12});
+    P.push({geo:G_cyl(0.16, 0.16, 0.05, 12), color:0xffe600, x:0.64, y:1.56, z:0.12});
+    P.push({geo:G_octa(0.20), color:C.glow, x:0.64, y:1.78, z:0.12});
   } else if(C.id === 'bomber'){
-    /* 火药：护目镜（两片发光镜片）+ 背包 + 引线 */
-    P.push({geo:G_box(0.46, 0.11, 0.07), color:0x3a2a18, y:1.32, z:0.35});
-    P.push({geo:G_sphere(0.10, 8, 8), color:C.glow, x:-0.15, y:1.32, z:0.42});
-    P.push({geo:G_sphere(0.10, 8, 8), color:C.glow, x:0.15, y:1.32, z:0.42});
-    P.push({geo:G_box(0.54, 0.50, 0.32), color:0x6d3a12, y:0.78, z:-0.44});
-    P.push({geo:G_cyl(0.03, 0.03, 0.26, 6), color:INK, x:0.18, y:1.34, z:-0.40});
-    P.push({geo:G_sphere(0.07, 6, 6), color:0xffc400, x:0.18, y:1.48, z:-0.40});
+    /* 火药：铆钉双镜护目镜 + 爆炸物背包 + 侧挂手雷 + 火花引线 */
+    P.push({geo:G_box(0.50, 0.13, 0.09), color:0x3a2a18, y:1.33, z:0.36});
+    P.push({geo:G_sphere(0.11, 10, 8), color:C.glow, x:-0.16, y:1.33, z:0.43});
+    P.push({geo:G_sphere(0.11, 10, 8), color:C.glow, x:0.16, y:1.33, z:0.43});
+    P.push({geo:G_box(0.58, 0.54, 0.34), color:0x6d3a12, y:0.80, z:-0.45});
+    P.push({geo:G_sphere(0.15, 8, 8), color:INK, x:-0.52, y:0.64, z:0.18});
+    P.push({geo:G_sphere(0.15, 8, 8), color:INK, x:0.52, y:0.64, z:0.18});
+    P.push({geo:G_cyl(0.035, 0.035, 0.30, 6), color:INK, x:0.18, y:1.36, z:-0.42});
+    P.push({geo:G_octa(0.11), color:0xffc400, x:0.18, y:1.54, z:-0.42});
   }
 
   var geo = mergeParts(P);
   var mesh = new THREE.Mesh(geo, toonVC());
-  var out = new THREE.Mesh(outlineGeo(geo, 0.032), OUTLINE_MAT);
+  var out = new THREE.Mesh(outlineGeo(geo, 0.036), OUTLINE_MAT);
   mesh.add(out);
-  mesh.scale.setScalar(1.14);
+  mesh.scale.setScalar(1.16);
 
   var g = new THREE.Group();
   g.add(mesh);
@@ -2449,75 +2574,79 @@ function G_cyl(rt, rb, h, seg){ return new THREE.CylinderGeometry(rt, rb, h, seg
 
 var INK = 0x0a0a12, WHITE = 0xfff6e9;
 
-/* ── 墨渍虫：软体，两只大眼，身后三根触须 ── */
+/* ── 墨渍虫：软体，凶眼眉、头顶赛璐珞高光点、五根张开触须 ── */
 function makeBlob(){
   var P = [];
-  P.push({geo:G_sphere(0.55, 12, 9), color:COS.pur, y:0.52, sy:0.82});
-  P.push({geo:G_sphere(0.20), color:WHITE, x:-0.19, y:0.70, z:0.40});
-  P.push({geo:G_sphere(0.20), color:WHITE, x:0.19, y:0.70, z:0.40});
-  P.push({geo:G_sphere(0.10), color:INK, x:-0.19, y:0.70, z:0.55});
-  P.push({geo:G_sphere(0.10), color:INK, x:0.19, y:0.70, z:0.55});
-  P.push({geo:G_cone(0.075, 0.46, 5), color:COS.mag, x:0, y:0.20, z:-0.42, rx:1.45});
-  P.push({geo:G_cone(0.065, 0.40, 5), color:COS.mag, x:-0.28, y:0.16, z:-0.34, rx:1.15, rz:0.4});
-  P.push({geo:G_cone(0.065, 0.40, 5), color:COS.mag, x:0.28, y:0.16, z:-0.34, rx:1.15, rz:-0.4});
+  P.push({geo:G_sphere(0.56, 14, 10), color:COS.pur, y:0.52, sy:0.84});
+  P.push({geo:G_sphere(0.09, 6, 6), color:0xd8b8ff, x:-0.18, y:0.92, z:-0.08});
+  P.push({geo:G_sphere(0.21, 10, 8), color:WHITE, x:-0.19, y:0.70, z:0.40});
+  P.push({geo:G_sphere(0.21, 10, 8), color:WHITE, x:0.19, y:0.70, z:0.40});
+  P.push({geo:G_sphere(0.10, 8, 8), color:INK, x:-0.19, y:0.70, z:0.56});
+  P.push({geo:G_sphere(0.10, 8, 8), color:INK, x:0.19, y:0.70, z:0.56});
+  P.push({geo:G_box(0.24, 0.06, 0.08), color:INK, x:-0.20, y:0.91, z:0.42, rz:-0.32});
+  P.push({geo:G_box(0.24, 0.06, 0.08), color:INK, x:0.20, y:0.91, z:0.42, rz:0.32});
+  P.push({geo:G_cone(0.08, 0.50, 5), color:COS.mag, x:0, y:0.20, z:-0.45, rx:1.48});
+  P.push({geo:G_cone(0.07, 0.44, 5), color:COS.mag, x:-0.30, y:0.17, z:-0.36, rx:1.18, rz:0.44});
+  P.push({geo:G_cone(0.07, 0.44, 5), color:COS.mag, x:0.30, y:0.17, z:-0.36, rx:1.18, rz:-0.44});
+  P.push({geo:G_cone(0.06, 0.34, 5), color:0xff7ac4, x:-0.44, y:0.15, z:-0.14, rx:0.65, rz:0.85});
+  P.push({geo:G_cone(0.06, 0.34, 5), color:0xff7ac4, x:0.44, y:0.15, z:-0.14, rx:0.65, rz:-0.85});
   return mergeParts(P);
 }
 
-/* ── 尖刺兽：八面体身体 + 六根黄刺 + 一道横眼 ── */
+/* ── 尖刺兽：八面体机甲核 + 暗墨背脊 + 八根尖刺 + 荧光横眼 ── */
 function makeSpiker(){
   var P = [];
-  /* 原来是 #00E5FF，明度和浅蓝地面几乎一样，怪物会「隐身」。
-     压到 #12A6C4（明度 62），比地面暗 20 档，同时也更深、更沉。 */
-  P.push({geo:G_octa(0.46), color:COS.teal, y:0.62});
-  P.push({geo:G_cone(0.10, 0.44, 4), color:COS.yel, x:-0.30, y:0.86, rz:0.9});
-  P.push({geo:G_cone(0.10, 0.44, 4), color:COS.yel, x:0.30, y:0.86, rz:-0.9});
-  P.push({geo:G_cone(0.10, 0.44, 4), color:COS.yel, x:-0.30, y:0.38, rz:-0.9});
-  P.push({geo:G_cone(0.10, 0.44, 4), color:COS.yel, x:0.30, y:0.38, rz:0.9});
-  P.push({geo:G_cone(0.12, 0.42, 4), color:COS.yel, y:1.02});
-  P.push({geo:G_box(0.46, 0.09, 0.1), color:INK, y:0.66, z:0.40});
-  P.push({geo:G_box(0.10, 0.10, 0.06), color:COS.mag, x:-0.13, y:0.66, z:0.45});
-  P.push({geo:G_box(0.10, 0.10, 0.06), color:COS.mag, x:0.13, y:0.66, z:0.45});
+  P.push({geo:G_octa(0.48), color:COS.teal, y:0.62});
+  P.push({geo:G_box(0.20, 0.24, 0.56), color:0x0b4b63, y:0.76, z:-0.04});
+  P.push({geo:G_cone(0.11, 0.48, 4), color:COS.yel, x:-0.32, y:0.88, rz:0.9});
+  P.push({geo:G_cone(0.11, 0.48, 4), color:COS.yel, x:0.32, y:0.88, rz:-0.9});
+  P.push({geo:G_cone(0.11, 0.48, 4), color:COS.yel, x:-0.32, y:0.38, rz:-0.9});
+  P.push({geo:G_cone(0.11, 0.48, 4), color:COS.yel, x:0.32, y:0.38, rz:0.9});
+  P.push({geo:G_cone(0.13, 0.48, 4), color:COS.yel, y:1.06});
+  P.push({geo:G_cone(0.10, 0.42, 4), color:COS.yel, y:0.64, z:-0.48, rx:-1.55});
+  P.push({geo:G_box(0.50, 0.11, 0.11), color:INK, y:0.66, z:0.41});
+  P.push({geo:G_box(0.11, 0.10, 0.06), color:COS.mag, x:-0.14, y:0.66, z:0.46});
+  P.push({geo:G_box(0.11, 0.10, 0.06), color:COS.mag, x:0.14, y:0.66, z:0.46});
   return mergeParts(P);
 }
 
-/* ── 肥球：大圆身 + 一张裂口 + 四颗牙 + 两条小短腿 ── */
+/* ── 肥球：大圆身 + 粗眉脊 + 四颗锯牙 + 铆钉肩块 + 短战靴 ── */
 function makeChunk(){
-  /* 坑：原来脸全放在球体下半部（y=0.72, z=0.80），而相机是 55° 俯视，
-     球自己把脸挡住了，画面上就是一个纯黄色圆盘，玩家认不出是怪。
-     现在整张脸移到球体前上方（y=1.10~1.34），俯视能看见。 */
   var P = [];
-  P.push({geo:G_sphere(0.88, 14, 10), color:COS.yel, y:0.86, sy:0.92});
-  /* 位置按球面算：球心 y=0.86、半径 0.88、y 压扁 0.92。
-     y=1.05 处球面水平半径 0.855，y=1.30 处是 0.739。
-     零件必须压在这条线外侧，否则被球体自己挡住（原来就吃这个亏）。 */
-  // 裂口：中心 z=0.80，深 0.36 → 前表面 0.98，凸出球面 0.13
-  P.push({geo:G_box(0.62, 0.32, 0.36), color:INK, y:1.05, z:0.80});
-  // 三颗牙，再往前一点
-  P.push({geo:G_box(0.11, 0.18, 0.10), color:WHITE, x:-0.17, y:1.05, z:0.99});
-  P.push({geo:G_box(0.11, 0.18, 0.10), color:WHITE, x:0.00,  y:1.05, z:1.01});
-  P.push({geo:G_box(0.11, 0.18, 0.10), color:WHITE, x:0.17,  y:1.05, z:0.99});
-  // 两颗红眼（球面在 z≈0.675，放 0.70 略外）+ 黑瞳
-  P.push({geo:G_sphere(0.17), color:COS.red, x:-0.30, y:1.30, z:0.70});
-  P.push({geo:G_sphere(0.17), color:COS.red, x:0.30,  y:1.30, z:0.70});
-  P.push({geo:G_sphere(0.075), color:INK,    x:-0.30, y:1.31, z:0.84});
-  P.push({geo:G_sphere(0.075), color:INK,    x:0.30,  y:1.31, z:0.84});
-  // 短腿：放到球体底部两侧外面（原来 y=0.20 埋在球里，只露一点像耳朵）
-  P.push({geo:G_sphere(0.19), color:COS.pur, x:-0.42, y:0.10, z:0.04});
-  P.push({geo:G_sphere(0.19), color:COS.pur, x:0.42,  y:0.10, z:0.04});
+  P.push({geo:G_sphere(0.89, 16, 12), color:COS.yel, y:0.86, sy:0.92});
+  P.push({geo:G_sphere(0.13, 8, 8), color:0xfff7b8, x:-0.28, y:1.58, z:-0.12});
+  P.push({geo:G_box(0.70, 0.12, 0.16), color:INK, y:1.45, z:0.64, rx:0.25});
+  P.push({geo:G_box(0.66, 0.34, 0.36), color:INK, y:1.05, z:0.80});
+  P.push({geo:G_box(0.10, 0.20, 0.10), color:WHITE, x:-0.21, y:1.06, z:0.99});
+  P.push({geo:G_box(0.10, 0.16, 0.10), color:WHITE, x:-0.07, y:1.03, z:1.01});
+  P.push({geo:G_box(0.10, 0.16, 0.10), color:WHITE, x:0.07,  y:1.03, z:1.01});
+  P.push({geo:G_box(0.10, 0.20, 0.10), color:WHITE, x:0.21,  y:1.06, z:0.99});
+  P.push({geo:G_sphere(0.17, 10, 8), color:COS.red, x:-0.30, y:1.30, z:0.70});
+  P.push({geo:G_sphere(0.17, 10, 8), color:COS.red, x:0.30,  y:1.30, z:0.70});
+  P.push({geo:G_sphere(0.08, 8, 8), color:INK,    x:-0.30, y:1.31, z:0.84});
+  P.push({geo:G_sphere(0.08, 8, 8), color:INK,    x:0.30,  y:1.31, z:0.84});
+  P.push({geo:G_box(0.22, 0.24, 0.32), color:0xc47a00, x:-0.86, y:0.88, z:0.04, rz:0.3});
+  P.push({geo:G_box(0.22, 0.24, 0.32), color:0xc47a00, x:0.86,  y:0.88, z:0.04, rz:-0.3});
+  P.push({geo:G_sphere(0.21, 10, 8), color:COS.pur, x:-0.44, y:0.11, z:0.06});
+  P.push({geo:G_sphere(0.21, 10, 8), color:COS.pur, x:0.44,  y:0.11, z:0.06});
   return mergeParts(P);
 }
 
 function makeThrower(){
   var P = [];
-  P.push({geo:G_cyl(0.32, 0.44, 0.82, 8), color:COS.red, y:0.42});
-  P.push({geo:G_sphere(0.30, 12, 9), color:COS.red, y:1.02});
-  P.push({geo:G_sphere(0.09), color:WHITE, x:-0.11, y:1.06, z:0.24});
-  P.push({geo:G_sphere(0.09), color:WHITE, x:0.11, y:1.06, z:0.24});
-  P.push({geo:G_sphere(0.05), color:INK, x:-0.11, y:1.06, z:0.31});
-  P.push({geo:G_sphere(0.05), color:INK, x:0.11, y:1.06, z:0.31});
-  P.push({geo:G_box(0.12, 0.42, 0.12), color:0x8a1a12, x:0.36, y:0.72, z:0.10, rz:-0.25});
-  P.push({geo:G_sphere(0.15), color:COS.yel, x:0.44, y:0.98, z:0.14});
-  P.push({geo:G_cone(0.34, 0.26, 6), color:COS.mag, y:1.28, rz:0.2});
+  P.push({geo:G_cyl(0.32, 0.45, 0.82, 10), color:COS.red, y:0.42});
+  P.push({geo:G_cyl(0.41, 0.43, 0.10, 10), color:INK, y:0.34});
+  P.push({geo:G_box(0.10, 0.72, 0.14), color:0x3d0c08, x:0, y:0.50, z:0.34, rz:0.55});
+  P.push({geo:G_sphere(0.31, 14, 10), color:COS.red, y:1.02});
+  P.push({geo:G_sphere(0.095, 8, 8), color:WHITE, x:-0.11, y:1.06, z:0.25});
+  P.push({geo:G_sphere(0.095, 8, 8), color:WHITE, x:0.11, y:1.06, z:0.25});
+  P.push({geo:G_sphere(0.052, 6, 6), color:INK, x:-0.11, y:1.06, z:0.32});
+  P.push({geo:G_sphere(0.052, 6, 6), color:INK, x:0.11, y:1.06, z:0.32});
+  P.push({geo:G_box(0.13, 0.44, 0.13), color:0x8a1a12, x:0.37, y:0.72, z:0.10, rz:-0.25});
+  P.push({geo:G_sphere(0.17, 10, 8), color:COS.yel, x:0.45, y:0.98, z:0.15});
+  P.push({geo:G_octa(0.08), color:WHITE, x:0.48, y:1.18, z:0.15});
+  P.push({geo:G_cyl(0.36, 0.38, 0.07, 10), color:INK, y:1.18});
+  P.push({geo:G_cone(0.36, 0.30, 8), color:COS.mag, y:1.34, rz:0.18});
   return mergeParts(P);
 }
 
@@ -4428,7 +4557,7 @@ function nextWave(){
    这样 BOSS 战时长稳定在 12-18 秒，不会因为写死一个常数而崩。
    现在它只用于「标准配装参考」和数值自洽校验（docs/tools/calc_curve.py），
    不再决定 BOSS 血量——那已经改成按实时 DPS 派生。改武器参数后仍要重跑工具同步。 */
-var EXPECTED_DPS = [13, 32, 119, 180, 517, 737, 789, 1174, 1419, 1797];
+var EXPECTED_DPS = [21, 36, 142, 264, 430, 664, 832, 1088, 1371, 1770];
 
 /* 清场：BOSS 登场时小兵全部震散。
    以前是小兵和 BOSS 混在一起打，玩家分不清该躲谁，
